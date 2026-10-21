@@ -198,8 +198,6 @@ registros sem o "pai" ou mal formados são recusados e contados. O mais recente 
 - Ficha recebida entra como cópia editável, só marcada como "Ficha recebida" (ainda não é somente leitura).
 - A senha usa scrypt em JavaScript (N=2^14): leva alguns segundos em celulares mais simples.
 
-## Próximas etapas
-
-1. Pareamento, permissões por seção e sincronização entre aparelhos
-#   A j u d a - p e t  
+#   A j u d a - p e t 
+ 
  
