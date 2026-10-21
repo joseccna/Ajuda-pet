@@ -56,7 +56,7 @@ export class BaseRepository {
     }
     return modelo;
   }
-  /** Exclusão lógica: o registro some das listas, mas a exclusão pode ser sincronizada. */
+  /** Exclusão lógica: o registro some das listas, mas continua no banco e vai junto no backup. */
   excluir(id) {
     const agora = new Date().toISOString();
     this.db.runSync(

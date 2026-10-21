@@ -2,7 +2,8 @@ import { novoId } from '../utils/id';
 import { Database } from './Database';
 /**
  * Identidade deste aparelho. Cada instalação gera um id na primeira abertura.
- * Ele é gravado nos registros (autor) e será usado no pareamento e na sincronização.
+ * Ele é gravado nos registros (autor) e nos arquivos de backup, para reconhecer
+ * na importação se o arquivo veio deste mesmo aparelho.
  */
 export class DeviceIdentity {
   static {

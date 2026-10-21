@@ -1,8 +1,8 @@
 import { novoId } from '../utils/id';
 
 /**
- * Base de todos os models. Cada model herda os campos padrão (preparados para
- * backup e sincronização): id (UUID), criadoEm, atualizadoEm, excluidoEm e
+ * Base de todos os models. Cada model herda os campos padrão (usados no
+ * backup e na importação): id (UUID), criadoEm, atualizadoEm, excluidoEm e
  * autorDispositivoId.
  *
  * Quem herda precisa implementar toRow().

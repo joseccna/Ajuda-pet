@@ -1,6 +1,6 @@
 import { BaseModel } from './BaseModel';
 
-/** A mensagem de homenagem a um pet. O autor fica em autorDispositivoId (cada tutor poderá escrever a sua). */
+/** A mensagem de homenagem a um pet. O autor fica em autorDispositivoId. */
 export class Homenagem extends BaseModel {
   constructor(dados = {}, base) {
     super(base);
