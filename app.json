@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Ajuda Pet",
+    "slug": "ajuda-pet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ajudapet.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF9F4",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ajudapet.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "ajudapet",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Ajuda Pet usa suas fotos para mostrar o rosto do seu pet.",
+          "cameraPermission": "O Ajuda Pet usa a câmera para tirar a foto do seu pet."
+        }
+      ],
+      "expo-notifications"
+    ]
+  }
+}
