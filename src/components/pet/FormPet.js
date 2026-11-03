@@ -66,6 +66,8 @@ export function FormPet({ petInicial, aoSalvar }) {
   useEffect(() => {
     return navigation.addListener('beforeRemove', (evento) => {
       if (saindo.current || !mudouRef.current) return;
+      // O pet foi excluído na tela de edição: não há mais o que salvar.
+      if (petInicial && !petService.buscar(petInicial.id)) return;
       evento.preventDefault();
       Alert.alert('Descartar alterações?', 'O que você preencheu não será salvo.', [
         { text: 'Continuar editando', style: 'cancel' },
@@ -79,7 +81,7 @@ export function FormPet({ petInicial, aoSalvar }) {
         },
       ]);
     });
-  }, [navigation]);
+  }, [navigation, petInicial]);
   function montarPet() {
     const nasc = resolverNascimento(e.nascimento);
     const pet = petInicial ?? new Pet();

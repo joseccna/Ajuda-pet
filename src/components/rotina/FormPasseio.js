@@ -174,7 +174,7 @@ export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
       </View>
       {!editando ? (
         <Texto variante="legenda" style={{ marginTop: 16 }}>
-          Para medir o tempo na hora, use o botão "Iniciar passeio" na aba Rotina.
+          Para medir o tempo na hora, use o botão “Iniciar passeio” na aba Rotina.
         </Texto>
       ) : null}
     </View>

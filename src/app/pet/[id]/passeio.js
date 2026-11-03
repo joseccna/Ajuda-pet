@@ -68,7 +68,7 @@ export default function PasseioDoPet() {
   const [marcacoes, setMarcacoes] = useState(() =>
     passeio ? passeioService.marcacoesDoPasseio(passeio.id) : [],
   );
-  const [agora, setAgora] = useState(Date.now());
+  const [agora, setAgora] = useState(() => Date.now());
   const [distancia, setDistancia] = useState('');
   const [observacao, setObservacao] = useState('');
   const [erro, setErro] = useState();

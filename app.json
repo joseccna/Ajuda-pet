@@ -12,7 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FFF9F4",
+        "backgroundColor": "#FF7A52",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -27,13 +27,31 @@
     "plugins": [
       "expo-router",
       [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF9F4",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#17120F"
+          }
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "O Ajuda Pet usa suas fotos para mostrar o rosto do seu pet.",
           "cameraPermission": "O Ajuda Pet usa a câmera para tirar a foto do seu pet."
         }
       ],
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#C2410C"
+        }
+      ]
     ]
   }
 }

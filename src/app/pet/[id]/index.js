@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SecaoFotos } from '../../../components/fotos/SecaoFotos';
+import { LembreteCard } from '../../../components/painel/LembreteCard';
 import { ResumoCard } from '../../../components/pet/ResumoCard';
 import { TabsPet } from '../../../components/pet/TabsPet';
 import { SecaoRotina } from '../../../components/rotina/SecaoRotina';
@@ -19,12 +20,12 @@ import { SituacaoBadge } from '../../../components/ui/SituacaoBadge';
 import { Texto } from '../../../components/ui/Texto';
 import { useCarteirinha } from '../../../hooks/useCarteirinha';
 import { useConsultas } from '../../../hooks/useConsultas';
+import { usePainel } from '../../../hooks/usePainel';
 import { usePet } from '../../../hooks/usePet';
 import { usePeso } from '../../../hooks/usePeso';
 import { usePreferencias } from '../../../hooks/usePreferencias';
 import { textoQuando } from '../../../models/regrasConsulta';
 import { formatarDiferenca, formatarPeso } from '../../../models/regrasPeso';
-import { petService } from '../../../services/PetService';
 import { espaco, fontes, useTheme } from '../../../theme';
 import { formatarDataCurta, paraISO } from '../../../utils/datas';
 
@@ -51,12 +52,13 @@ function Linha({ rotulo, valor }) {
   );
 }
 
-/** Perfil do pet. As abas de Rotina, Fotos e Acesso entram nas próximas etapas. */
+/** Perfil do pet: o que precisa de atenção no topo, depois resumo, saúde, rotina e fotos. */
 export default function PerfilPet() {
   const router = useRouter();
   const { paleta } = useTheme();
   const { id, aba: abaInicial, secao: secaoInicial } = useLocalSearchParams();
   const { pet, carregando, recarregar: recarregarPet } = usePet(id);
+  const { painel } = usePainel();
   const { cartoes } = useCarteirinha(id);
   const { resumo: peso } = usePeso(id, '6m');
   const { unidadePeso } = usePreferencias();
@@ -89,22 +91,17 @@ export default function PerfilPet() {
     setAba('saude');
   };
 
-  function confirmarExclusao() {
-    Alert.alert(
-      `Excluir ${pet.nome}?`,
-      'O cadastro some da lista. Esta ação não pode ser desfeita pelo app.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => {
-            petService.excluir(pet.id);
-            router.back();
-          },
-        },
-      ],
-    );
+  // Os mesmos lembretes do painel (o número em cima do pet na Home), só os deste pet.
+  const lembretes = pet.falecido ? [] : [...painel.hoje, ...painel.proximos].filter((l) => l.petId === pet.id);
+  const temUrgente = lembretes.some((l) => l.dias <= 0);
+  // Lembrete que leva para uma aba deste mesmo perfil só troca a aba, sem abrir o perfil de novo.
+  function abrirLembrete({ rota }) {
+    if (rota?.pathname === '/pet/[id]' && rota.params?.id === pet.id) {
+      setAba(rota.params.aba ?? 'resumo');
+      if (rota.params.secao) setSecao(rota.params.secao);
+    } else if (rota) {
+      router.push(rota);
+    }
   }
 
   const maisUrgente = cartoes.find((c) => c.situacao.estado !== 'sem-previsao');
@@ -154,6 +151,16 @@ export default function PerfilPet() {
 
       {aba === 'resumo' ? (
         <View>
+          {lembretes.length > 0 ? (
+            <View style={{ marginBottom: espaco.md }}>
+              <Texto variante="subtitulo" accessibilityRole="header" style={{ marginBottom: espaco.sm }}>
+                {temUrgente ? 'Precisa de atenção' : 'Próximos lembretes'}
+              </Texto>
+              {lembretes.map((l) => (
+                <LembreteCard key={l.chave} lembrete={l} aoPressionar={() => abrirLembrete(l)} />
+              ))}
+            </View>
+          ) : null}
           <ResumoCard
             icone="shield-checkmark-outline"
             titulo="Próxima vacina"
@@ -215,25 +222,6 @@ export default function PerfilPet() {
               <Texto variante="legenda">Toque em editar para completar os dados {pet.deNome}.</Texto>
             ) : null}
           </Card>
-
-          <View style={[styles.aviso, { backgroundColor: paleta.destaqueSuave }]}>
-            <Texto variante="legenda" cor="destaque">
-              O acesso e o compartilhamento chegam nas próximas etapas.
-            </Texto>
-          </View>
-
-          {!pet.falecido ? (
-            <View style={{ alignItems: 'flex-start', marginBottom: espaco.md }}>
-              <Button
-                titulo="Registrar despedida"
-                variante="texto"
-                larguraTotal={false}
-                aoPressionar={() => irPara('/pet/[id]/despedida')}
-                dicaAcessibilidade="Move o pet para o memorial, com calma. Dá para desfazer"
-              />
-            </View>
-          ) : null}
-          <Button titulo="Excluir pet" variante="perigo" aoPressionar={confirmarExclusao} />
         </View>
       ) : aba === 'saude' ? (
         <View>
@@ -259,6 +247,5 @@ const styles = StyleSheet.create({
   identidade: { flexDirection: 'row', alignItems: 'center', gap: espaco.lg, marginBottom: espaco.lg },
   titulo: { marginTop: espaco.md, marginBottom: espaco.sm },
   linha: { paddingVertical: espaco.sm },
-  aviso: { padding: espaco.md, borderRadius: 14, marginBottom: espaco.xl },
   memoria: { padding: espaco.lg, borderRadius: 14, marginBottom: espaco.lg },
 });

@@ -40,17 +40,16 @@ export default function RaizLayout() {
     DMSans_700Bold,
     Lora_500Medium,
   });
-  const [bancoPronto, setBancoPronto] = useState(false);
-  const [erroBanco, setErroBanco] = useState(null);
-  useEffect(() => {
+  // O banco abre de forma síncrona, uma vez, antes da primeira renderização.
+  const [{ bancoPronto, erroBanco }] = useState(() => {
     try {
       Database.iniciar();
       DeviceIdentity.iniciar();
-      setBancoPronto(true);
+      return { bancoPronto: true, erroBanco: null };
     } catch (e) {
-      setErroBanco(e instanceof Error ? e.message : String(e));
+      return { bancoPronto: false, erroBanco: e instanceof Error ? e.message : String(e) };
     }
-  }, []);
+  });
   // Notificações: configura ao abrir e agenda de novo ao abrir e ao voltar para o app.
   useEffect(() => {
     if (!bancoPronto) return undefined;
