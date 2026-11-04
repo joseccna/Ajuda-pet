@@ -15,12 +15,12 @@ const PASSOS = [
       'Nas configurações do celular, abra Apps, Ajuda Pet, Notificações e deixe tudo ligado. Em Preferências, o app mostra se as notificações estão ativadas.',
   },
   {
-    titulo: '2. Libere o app da economia de bateria (Android)',
+    titulo: '2. Libere o app da economia de bateria',
     texto:
       'Alguns celulares, como Samsung, Xiaomi e Motorola, fecham apps para economizar bateria e atrasam os avisos. Em Apps, Ajuda Pet, Bateria, escolha "Sem restrições".',
   },
   {
-    titulo: '3. Confira os modos de foco (iPhone e Android)',
+    titulo: '3. Confira os modos de foco',
     texto:
       'O "Não perturbe" e os modos de foco silenciam os avisos. Libere o Ajuda Pet nessas listas ou desligue o modo.',
   },

@@ -2,14 +2,11 @@
   "expo": {
     "name": "Ajuda Pet",
     "slug": "ajuda-pet",
+    "owner": "jose.ccna",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.ajudapet.app"
-    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FF7A52",
@@ -18,7 +15,10 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.ajudapet.app"
+      "package": "com.ajudapet.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -52,6 +52,12 @@
           "color": "#C2410C"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b9d8f178-45e4-4f9c-b64a-2b50212bc2a4"
+      }
+    }
   }
 }
