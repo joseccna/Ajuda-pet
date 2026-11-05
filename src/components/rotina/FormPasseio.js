@@ -77,14 +77,15 @@ export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
           .split(':')
           .map(Number);
         const inicio = new Date(a, m - 1, d, h, mi, 0);
-        passeio.inicio = inicio.toISOString();
-        passeio.duracaoMin = duracaoMin;
-        passeio.fim = new Date(
+        const item = passeio.copia();
+        item.inicio = inicio.toISOString();
+        item.duracaoMin = duracaoMin;
+        item.fim = new Date(
           inicio.getTime() + (Number.isFinite(duracaoMin) ? duracaoMin : 0) * 60000,
         ).toISOString();
-        passeio.distanciaKm = distanciaKm;
-        passeio.observacao = e.observacao;
-        passeioService.salvar(passeio);
+        item.distanciaKm = distanciaKm;
+        item.observacao = e.observacao;
+        passeioService.salvar(item);
       } else {
         passeioService.registrarManual({
           petId: pet.id,

@@ -56,7 +56,7 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
       return;
     }
 
-    const item = lembrete ?? new LembreteAvulso();
+    const item = lembrete?.copia() ?? new LembreteAvulso();
     item.petId = e.petId;
     item.tipo = e.tipo;
     item.titulo = e.titulo;

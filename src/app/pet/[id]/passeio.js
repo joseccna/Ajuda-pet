@@ -9,6 +9,7 @@ import { Campo } from '../../../components/ui/Campo';
 import { EstadoVazio } from '../../../components/ui/EstadoVazio';
 import { Screen } from '../../../components/ui/Screen';
 import { Texto } from '../../../components/ui/Texto';
+import { useConfirmarSaida } from '../../../hooks/useConfirmarSaida';
 import { usePet } from '../../../hooks/usePet';
 import { usePreferencias } from '../../../hooks/usePreferencias';
 import {
@@ -76,6 +77,8 @@ export default function PasseioDoPet() {
 
   const andamento = Boolean(passeio?.emAndamento);
   const pausado = Boolean(passeio?.pausadoDesde);
+  // Só o resumo tem o que perder: o passeio em andamento continua contando depois de sair.
+  const { liberarSaida } = useConfirmarSaida(distancia.trim() !== '' || observacao.trim() !== '');
 
   useEffect(() => {
     if (!andamento) return undefined;
@@ -136,6 +139,7 @@ export default function PasseioDoPet() {
     }
     try {
       passeioService.concluirDetalhes(passeio.id, { distanciaKm: km, observacao });
+      liberarSaida();
       router.back();
     } catch {
       setErro('Não foi possível salvar. Confira a distância.');

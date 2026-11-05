@@ -10,7 +10,10 @@ export function useConfirmarSaida(temAlteracoes) {
   const navigation = useNavigation();
   const saindo = useRef(false);
   const mudou = useRef(temAlteracoes);
-  mudou.current = temAlteracoes;
+
+  useEffect(() => {
+    mudou.current = temAlteracoes;
+  }, [temAlteracoes]);
 
   useEffect(() => {
     return navigation.addListener('beforeRemove', (evento) => {

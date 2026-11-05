@@ -10,6 +10,16 @@ describe('Pet', () => {
     expect(pet.criadoEm).toBe(pet.atualizadoEm);
     expect(pet.excluidoEm).toBeNull();
   });
+  it('copia sem alterar o original e mantém o id e os métodos', () => {
+    const pet = new Pet({ nome: 'Thor', sexo: 'macho' });
+    const copia = pet.copia();
+    copia.nome = 'Luna';
+    expect(pet.nome).toBe('Thor');
+    expect(copia).toBeInstanceOf(Pet);
+    expect(copia.id).toBe(pet.id);
+    expect(copia.deNome).toBe('do Luna');
+    expect(copia.validar()).toEqual({});
+  });
   it('só exige nome e, para "outro", a espécie', () => {
     expect(new Pet({ nome: '' }).validar().nome).toBeDefined();
     expect(new Pet({ nome: '   ' }).validar().nome).toBeDefined();

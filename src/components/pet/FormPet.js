@@ -57,7 +57,9 @@ export function FormPet({ petInicial, aoSalvar }) {
   const saindo = useRef(false);
   const mudou = JSON.stringify(e) !== inicial;
   const mudouRef = useRef(mudou);
-  mudouRef.current = mudou;
+  useEffect(() => {
+    mudouRef.current = mudou;
+  }, [mudou]);
   function mudar(campo, valor) {
     setE((atual) => ({ ...atual, [campo]: valor }));
     if (campo in erros) setErros((atual) => ({ ...atual, [campo]: undefined }));
@@ -84,7 +86,7 @@ export function FormPet({ petInicial, aoSalvar }) {
   }, [navigation, petInicial]);
   function montarPet() {
     const nasc = resolverNascimento(e.nascimento);
-    const pet = petInicial ?? new Pet();
+    const pet = petInicial?.copia() ?? new Pet();
     pet.nome = e.nome;
     pet.especie = e.especie;
     pet.especieOutra = e.especie === 'outro' ? e.especieOutra : '';

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { useConfirmarSaida } from '../../hooks/useConfirmarSaida';
 import { DoseVacina } from '../../models/DoseVacina';
 import { ErroValidacaoVacina, vacinaService } from '../../services/VacinaService';
 import { formatarDataBR, lerDataBR, mascararDataBR, paraISO, somarDias } from '../../utils/datas';
@@ -15,7 +15,6 @@ import { Texto } from '../ui/Texto';
  * A próxima dose é calculada pelo intervalo do tipo, mas pode ser ajustada à mão.
  */
 export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
-  const navigation = useNavigation();
   const editando = Boolean(dose);
   const [tipoId, setTipoId] = useState(dose?.tipoId ?? tipoIdInicial ?? tipos[0]?.id ?? '');
   const tipo = tipos.find((t) => t.id === tipoId);
@@ -36,32 +35,12 @@ export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
   );
   const [e, setE] = useState(inicial);
   const [erros, setErros] = useState({});
-  const saindo = useRef(false);
-  const mudou = useRef(false);
-  mudou.current = JSON.stringify(e) !== JSON.stringify(inicial);
+  const { liberarSaida } = useConfirmarSaida(JSON.stringify(e) !== JSON.stringify(inicial));
 
   function mudar(campo, valor) {
     setE((a) => ({ ...a, [campo]: valor }));
     setErros((a) => ({ ...a, [campo === 'data' ? 'dataAplicacao' : campo]: undefined }));
   }
-
-  useEffect(() => {
-    return navigation.addListener('beforeRemove', (evento) => {
-      if (saindo.current || !mudou.current) return;
-      evento.preventDefault();
-      Alert.alert('Descartar alterações?', 'O que você preencheu não será salvo.', [
-        { text: 'Continuar editando', style: 'cancel' },
-        {
-          text: 'Descartar',
-          style: 'destructive',
-          onPress: () => {
-            saindo.current = true;
-            navigation.dispatch(evento.data.action);
-          },
-        },
-      ]);
-    });
-  }, [navigation]);
 
   // Próxima dose calculada, mostrada como dica enquanto o campo manual está vazio.
   const dataLida = lerDataBR(e.data);
@@ -87,7 +66,7 @@ export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
       return;
     }
 
-    const registro = dose ?? new DoseVacina();
+    const registro = dose?.copia() ?? new DoseVacina();
     registro.tipoId = tipoId;
     registro.rotulo = e.rotulo;
     registro.dataAplicacao = aplicacao.iso;
@@ -99,7 +78,7 @@ export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
 
     try {
       vacinaService.salvarDose(registro);
-      saindo.current = true;
+      liberarSaida();
       aoSalvar();
     } catch (erro) {
       if (erro instanceof ErroValidacaoVacina) setErros(erro.erros);
@@ -115,7 +94,7 @@ export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
         style: 'destructive',
         onPress: () => {
           vacinaService.excluirDose(dose.id);
-          saindo.current = true;
+          liberarSaida();
           aoExcluir();
         },
       },

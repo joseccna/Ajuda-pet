@@ -16,6 +16,11 @@ export class BaseModel {
     this.excluidoEm = base?.excluidoEm ?? null;
     this.autorDispositivoId = base?.autorDispositivoId ?? null;
   }
+  /** Cópia para o formulário editar sem alterar o original, que a tela ainda está mostrando. */
+  copia() {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+  }
+
   /**
    * Colunas do domínio (sem os campos padrão, que o repositório cuida).
    * Deve devolver um objeto { coluna: string | number | null }.

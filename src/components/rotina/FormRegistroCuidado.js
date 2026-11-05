@@ -51,7 +51,7 @@ export function FormRegistroCuidado({ tipos, tipoIdInicial, detalhe, aoSalvar, a
       return;
     }
 
-    const registro = detalhe?.registro ?? new RegistroCuidado();
+    const registro = detalhe?.registro.copia() ?? new RegistroCuidado();
     registro.tipoId = tipoId;
     registro.data = dataLida.iso;
     registro.local = e.local;

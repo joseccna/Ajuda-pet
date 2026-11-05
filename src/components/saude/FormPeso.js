@@ -50,7 +50,7 @@ export function FormPeso({ pet, registro, aoSalvar, aoExcluir }) {
   };
 
   function gravar(gramas, dataISO) {
-    const item = registro ?? new RegistroPeso({ petId: pet.id });
+    const item = registro?.copia() ?? new RegistroPeso({ petId: pet.id });
     item.pesoG = gramas;
     item.data = dataISO;
     item.observacao = e.observacao;

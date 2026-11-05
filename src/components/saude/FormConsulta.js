@@ -71,7 +71,7 @@ export function FormConsulta({ pet, detalhe, aoSalvar, aoExcluir }) {
       return;
     }
 
-    const consulta = detalhe?.consulta ?? new Consulta({ petId: pet.id });
+    const consulta = detalhe?.consulta.copia() ?? new Consulta({ petId: pet.id });
     consulta.data = data.iso;
     consulta.hora = hora.hora;
     consulta.motivo = e.motivo;

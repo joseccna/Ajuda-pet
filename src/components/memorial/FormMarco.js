@@ -28,7 +28,7 @@ export function FormMarco({ pet, marco, aoSalvar, aoExcluir }) {
       }
       data = r.iso;
     }
-    const item = marco ?? new MarcoMemorial({ petId: pet.id });
+    const item = marco?.copia() ?? new MarcoMemorial({ petId: pet.id });
     item.titulo = e.titulo;
     item.data = data;
     try {

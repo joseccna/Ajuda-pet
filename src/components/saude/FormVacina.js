@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, View } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { useConfirmarSaida } from '../../hooks/useConfirmarSaida';
 import { descreverIntervalo, sugestoesPara } from '../../models/catalogoVacinas';
 import { ErroValidacaoVacina, vacinaService } from '../../services/VacinaService';
 import { lerDataBR, mascararDataBR } from '../../utils/datas';
@@ -19,34 +19,13 @@ const INTERVALOS = [
 
 /** Cadastra um novo cartão na carteirinha, com sugestões de vacinas comuns para a espécie. */
 export function FormVacina({ pet, aoSalvar }) {
-  const navigation = useNavigation();
   const sugestoes = sugestoesPara(pet.especie);
   const [nome, setNome] = useState('');
   const [intervalo, setIntervalo] = useState('365');
   const [diasOutro, setDiasOutro] = useState('');
   const [ultima, setUltima] = useState('');
   const [erros, setErros] = useState({});
-  const saindo = useRef(false);
-  const mudou = useRef(false);
-  mudou.current = nome !== '' || ultima !== '' || diasOutro !== '';
-
-  useEffect(() => {
-    return navigation.addListener('beforeRemove', (evento) => {
-      if (saindo.current || !mudou.current) return;
-      evento.preventDefault();
-      Alert.alert('Descartar alterações?', 'O que você preencheu não será salvo.', [
-        { text: 'Continuar editando', style: 'cancel' },
-        {
-          text: 'Descartar',
-          style: 'destructive',
-          onPress: () => {
-            saindo.current = true;
-            navigation.dispatch(evento.data.action);
-          },
-        },
-      ]);
-    });
-  }, [navigation]);
+  const { liberarSaida } = useConfirmarSaida(nome !== '' || ultima !== '' || diasOutro !== '');
 
   function escolherSugestao(valor) {
     const s = sugestoes.find((x) => x.nome === valor);
@@ -85,7 +64,7 @@ export function FormVacina({ pet, aoSalvar }) {
 
     try {
       const tipo = vacinaService.criarTipo({ petId: pet.id, nome, intervaloDias, dataUltimaDose });
-      saindo.current = true;
+      liberarSaida();
       aoSalvar(tipo);
     } catch (e) {
       if (e instanceof ErroValidacaoVacina) {
