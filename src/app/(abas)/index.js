@@ -20,6 +20,7 @@ import { espaco, useTheme } from '../../theme';
 import { saudacao } from '../../utils/datas';
 
 const MAX_VISIVEIS = 3;
+const MAX_ATALHOS = 4;
 
 function Secao({ titulo, children, acao }) {
   return (
@@ -35,7 +36,7 @@ function Secao({ titulo, children, acao }) {
   );
 }
 
-/** Painel do dia: lembretes de hoje, próximos, atalhos e os pets. */
+/** Painel do dia: lembretes de hoje, os pets e atalhos. O que vem depois fica na Agenda. */
 export default function Painel() {
   const router = useRouter();
   const { paleta } = useTheme();
@@ -45,6 +46,7 @@ export default function Painel() {
   const { atalhos } = usePreferencias();
   const situacaoBackup = useSituacaoBackup();
   const [verTodosHoje, setVerTodosHoje] = useState(false);
+  const [verTodosAtalhos, setVerTodosAtalhos] = useState(false);
 
   const abrir = (rota) => router.push(rota);
   const novoPet = () => router.push('/pet/novo');
@@ -67,7 +69,8 @@ export default function Painel() {
   }
 
   const visiveis = verTodosHoje ? painel.hoje : painel.hoje.slice(0, MAX_VISIVEIS);
-  const proximos = painel.proximos.slice(0, MAX_VISIVEIS);
+  const atalhosVisiveis = verTodosAtalhos ? atalhos : atalhos.slice(0, MAX_ATALHOS);
+  const qtdProximos = painel.proximos.length;
 
   return (
     <Screen bordas={['top', 'left', 'right']}>
@@ -118,27 +121,15 @@ export default function Painel() {
                 aoPressionar={() => setVerTodosHoje((v) => !v)}
               />
             ) : null}
-          </Secao>
-
-          {proximos.length > 0 ? (
-            <Secao titulo="Próximos">
-              {proximos.map((l) => (
-                <LembreteCard key={l.chave} lembrete={l} aoPressionar={() => abrir(l.rota)} />
-              ))}
-            </Secao>
-          ) : null}
-
-          <Secao titulo="Atalhos">
-            <View style={styles.atalhos}>
-              {atalhos.map((chave) => (
-                <AtalhoTile
-                  key={chave}
-                  rotulo={ATALHOS_INFO[chave].rotulo}
-                  icone={ATALHOS_INFO[chave].icone}
-                  aoPressionar={chave === 'novoPet' ? novoPet : () => irParaPet(chave)}
-                />
-              ))}
-            </View>
+            {qtdProximos > 0 ? (
+              <Button
+                titulo={`Ver ${qtdProximos} ${qtdProximos > 1 ? 'próximos' : 'próximo'} na Agenda`}
+                icone="calendar-outline"
+                variante="texto"
+                larguraTotal={false}
+                aoPressionar={() => router.navigate('/agenda')}
+              />
+            ) : null}
           </Secao>
 
           <Secao
@@ -158,6 +149,27 @@ export default function Painel() {
               aoAbrirPet={(p) => router.push({ pathname: '/pet/[id]', params: { id: p.id } })}
               aoAdicionar={novoPet}
             />
+          </Secao>
+
+          <Secao titulo="Atalhos">
+            <View style={styles.atalhos}>
+              {atalhosVisiveis.map((chave) => (
+                <AtalhoTile
+                  key={chave}
+                  rotulo={ATALHOS_INFO[chave].rotulo}
+                  icone={ATALHOS_INFO[chave].icone}
+                  aoPressionar={chave === 'novoPet' ? novoPet : () => irParaPet(chave)}
+                />
+              ))}
+            </View>
+            {atalhos.length > MAX_ATALHOS ? (
+              <Button
+                titulo={verTodosAtalhos ? 'Ver menos' : `Ver mais ${atalhos.length - MAX_ATALHOS}`}
+                variante="texto"
+                larguraTotal={false}
+                aoPressionar={() => setVerTodosAtalhos((v) => !v)}
+              />
+            ) : null}
           </Secao>
         </>
       )}
