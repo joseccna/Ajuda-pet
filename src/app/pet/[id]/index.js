@@ -27,7 +27,7 @@ import { usePreferencias } from '../../../hooks/usePreferencias';
 import { textoQuando } from '../../../models/regrasConsulta';
 import { formatarDiferenca, formatarPeso } from '../../../models/regrasPeso';
 import { espaco, fontes, useTheme } from '../../../theme';
-import { formatarDataCurta, paraISO } from '../../../utils/datas';
+import { paraISO } from '../../../utils/datas';
 
 const CASTRADO = { sim: 'Sim', nao: 'Não', desconhecido: 'Não sei' };
 const ABAS = [
@@ -81,9 +81,7 @@ export default function PerfilPet() {
     );
   }
 
-  const nascimento = pet.nascimento
-    ? `${pet.nascimentoAproximado ? 'Nascimento aproximado: ' : 'Nascido em '}${formatarDataCurta(pet.nascimento)}`
-    : '';
+  const nascimento = pet.textoNascimento;
 
   const irPara = (pathname, params = {}) => router.push({ pathname, params: { id: pet.id, ...params } });
   const abrirSaude = (s) => {

@@ -34,7 +34,7 @@ function Contato({ icone, titulo, valor, aoPressionar }) {
   );
 }
 
-/** Aba Tutor: perfil e contatos de confiança. Preferências e segurança chegam nas próximas etapas. */
+/** Aba Tutor: perfil, contatos de confiança e o caminho para as preferências do app. */
 export default function AbaTutor() {
   const router = useRouter();
   const { paleta } = useTheme();
@@ -98,6 +98,18 @@ export default function AbaTutor() {
           </View>
         </>
       )}
+
+      <Texto variante="rotulo" style={styles.titulo}>
+        Aplicativo
+      </Texto>
+      <View style={[styles.lista, { backgroundColor: paleta.cartao, borderColor: paleta.linha }]}>
+        <Contato
+          icone="settings-outline"
+          titulo="Preferências"
+          valor="Tema, lembretes, passeio, backup e atalhos"
+          aoPressionar={() => router.push('/preferencias')}
+        />
+      </View>
     </Screen>
   );
 }

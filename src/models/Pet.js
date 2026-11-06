@@ -1,4 +1,4 @@
-import { descreverIdade } from '../utils/datas';
+import { descreverIdade, formatarDataCurta } from '../utils/datas';
 import { BaseModel } from './BaseModel';
 
 /**
@@ -64,6 +64,15 @@ export class Pet extends BaseModel {
   /** "4 anos", "Cerca de 2 anos", "Idade desconhecida". */
   get idade() {
     return descreverIdade(this.nascimento, this.nascimentoAproximado);
+  }
+  /** "Nascida em 12 mar 2022", "Nascido em...", "Nascimento: ..." (sexo não informado) ou "Nascimento aproximado: ...". */
+  get textoNascimento() {
+    if (!this.nascimento) return '';
+    const data = formatarDataCurta(this.nascimento);
+    if (this.nascimentoAproximado) return `Nascimento aproximado: ${data}`;
+    if (this.sexo === 'femea') return `Nascida em ${data}`;
+    if (this.sexo === 'macho') return `Nascido em ${data}`;
+    return `Nascimento: ${data}`;
   }
   /** Linha curta para cartões: "Cachorra • 4 anos". */
   get resumo() {
