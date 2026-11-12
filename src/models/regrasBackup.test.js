@@ -45,7 +45,7 @@ function dadosCompletos() {
       base('pet-thor-1', { nome: 'Thor' }),
     ],
     tipos_vacina: [
-      base('vac-v8-001', { pet_id: 'pet-luna-1', nome: 'V8' }),
+      base('vac-v8-001', { pet_id: 'pet-luna-1', nome: 'V8', intervalo_dias: 365 }),
       base('vac-x-0001', { pet_id: 'pet-thor-1', nome: 'Raiva' }),
     ],
     doses_vacina: [
@@ -411,6 +411,8 @@ describe('ficha em PDF (HTML)', () => {
     expect(html).toContain('Alérgica a frango');
     expect(html).toContain('V8');
     expect(html).toContain('1ª dose');
+    // Próxima dose calculada (10/01/2026 + 365 dias), como na carteirinha do app.
+    expect(html).toContain('Próxima dose prevista: <strong>10/01/2027</strong>');
     expect(html).toContain('28 kg');
     expect(html).toContain('20/10/2026');
     expect(html).toContain('data:image/jpeg;base64,AAAA');

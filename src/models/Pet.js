@@ -61,6 +61,13 @@ export class Pet extends BaseModel {
     return `${prep} ${this.nome.trim()}`;
   }
 
+  /** "Ela", "Ele" ou o próprio nome quando o sexo não foi informado (para começar frases). */
+  get ele() {
+    if (this.sexo === 'femea') return 'Ela';
+    if (this.sexo === 'macho') return 'Ele';
+    return this.nome.trim();
+  }
+
   /** "4 anos", "Cerca de 2 anos", "Idade desconhecida". */
   get idade() {
     return descreverIdade(this.nascimento, this.nascimentoAproximado);

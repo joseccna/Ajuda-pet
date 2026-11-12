@@ -38,10 +38,18 @@ function Marcacao({ rotulo, ligada, aoAlternar }) {
         },
       ]}
     >
-      {ligada ? <Ionicons name="checkmark" size={18} color={paleta.destaque} /> : null}
+      {/* O ✓ ocupa espaço sempre (invisível quando desligado): marcar não muda a largura nem empurra os botões. */}
+      <Ionicons
+        name="checkmark"
+        size={18}
+        color={paleta.destaque}
+        style={{ opacity: ligada ? 1 : 0 }}
+        importantForAccessibility="no"
+      />
       <Texto
         style={{
-          fontFamily: ligada ? fontes.corpoNegrito : fontes.corpoMedio,
+          // Mesma fonte nos dois estados: o negrito também alargaria o botão.
+          fontFamily: fontes.corpoMedio,
           color: ligada ? paleta.destaque : paleta.texto,
         }}
       >

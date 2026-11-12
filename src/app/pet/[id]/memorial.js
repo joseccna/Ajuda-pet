@@ -64,7 +64,7 @@ function Pagina() {
   function desfazer() {
     Alert.alert(
       `Desfazer a despedida ${pet.deNome}?`,
-      'Ele(a) volta para a lista de pets e os lembretes voltam a valer. A homenagem e a linha do tempo continuam guardadas.',
+      `${pet.ele} volta para a lista de pets e os lembretes voltam a valer. A homenagem e a linha do tempo continuam guardadas.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {

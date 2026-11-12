@@ -20,6 +20,11 @@ describe('Pet', () => {
     expect(copia.deNome).toBe('do Luna');
     expect(copia.validar()).toEqual({});
   });
+  it('usa Ele, Ela ou o nome conforme o sexo', () => {
+    expect(new Pet({ nome: 'Luna', sexo: 'femea' }).ele).toBe('Ela');
+    expect(new Pet({ nome: 'Thor', sexo: 'macho' }).ele).toBe('Ele');
+    expect(new Pet({ nome: ' Pipoca ', sexo: 'desconhecido' }).ele).toBe('Pipoca');
+  });
   it('flexiona o texto de nascimento pelo sexo', () => {
     const base = { nome: 'A', nascimento: '2022-03-12' };
     expect(new Pet({ ...base, sexo: 'femea' }).textoNascimento).toMatch(/^Nascida em /);

@@ -7,7 +7,7 @@ import { AnexoConsulta } from '../models/AnexoConsulta';
 import { ConsultaPrivada } from '../models/ConsultaPrivada';
 import { criarLembrete } from '../models/Lembrete';
 import { criarEvento, estadoPorData } from '../models/regrasAgenda';
-import { gastoDoAno, separarConsultas, textoQuando } from '../models/regrasConsulta';
+import { gastoDoAno, horaDe, jaAconteceu, separarConsultas, textoQuando } from '../models/regrasConsulta';
 import { diferencaEmDias, formatarDataCurta, paraISO } from '../utils/datas';
 import { FotoService } from './FotoService';
 import { tutorService } from './TutorService';
@@ -45,7 +45,7 @@ export class ConsultaService {
     const hojeISO = paraISO(hoje);
     const todas = this.consultas.listarPorPet(petId);
     const privadas = this.privadas.mapaPorPet(petId);
-    const { proxima, agendadas, historico } = separarConsultas(todas, hojeISO);
+    const { proxima, agendadas, historico } = separarConsultas(todas, hojeISO, horaDe(hoje));
     const ano = hoje.getFullYear();
     return {
       proxima,
@@ -157,7 +157,7 @@ export class ConsultaService {
       if (!pet) continue;
       const rota = { pathname: '/pet/[id]/consulta', params: { id: pet.id, consultaId: c.id } };
       if (c.data >= inicioISO && c.data <= fimISO) {
-        const passada = c.data < hojeISO;
+        const passada = jaAconteceu(c, hojeISO, horaDe(hoje));
         resultado.push(
           criarEvento({
             chave: `consulta-${c.id}`,
@@ -167,7 +167,7 @@ export class ConsultaService {
             texto: passada ? 'Consulta realizada' : textoQuando(c, hojeISO),
             data: c.data,
             hora: c.hora,
-            estado: estadoPorData(c.data, hojeISO, false),
+            estado: passada ? 'passado' : estadoPorData(c.data, hojeISO, false),
             icone: 'medkit-outline',
             rota,
           }),
@@ -203,7 +203,8 @@ export class ConsultaService {
       if (!pet) continue;
 
       const dias = diferencaEmDias(hojeISO, c.data);
-      if (dias >= 0 && dias <= DIAS_LEMBRETE) {
+      // Consulta de hoje cuja hora já passou não é mais um lembrete.
+      if (dias >= 0 && dias <= DIAS_LEMBRETE && !jaAconteceu(c, hojeISO, horaDe(hoje))) {
         resultado.push(
           criarLembrete({
             chave: `consulta-${c.id}`,

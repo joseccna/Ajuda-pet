@@ -1,5 +1,6 @@
 import { formatarDataBR } from '../utils/datas';
 import { formatarPeso } from './regrasPeso';
+import { proximaDose } from './regrasVacina';
 
 /**
  * Monta o HTML da ficha do pet (para virar PDF). Recebe as tabelas já filtradas pela ficha
@@ -46,12 +47,21 @@ function secaoVacinas(t, petId) {
       const doses = (t.doses_vacina ?? [])
         .filter((d) => d.tipo_id === tipo.id)
         .sort(porData('data_aplicacao'));
-      return `<h4>${escapar(tipo.nome)}</h4>${tabela(
+      // A mesma regra da carteirinha: data ajustada à mão ou última dose + intervalo do tipo.
+      const proxima = proximaDose(
+        { intervaloDias: tipo.intervalo_dias },
+        doses.map((d) => ({ dataAplicacao: d.data_aplicacao, proximaDoseManual: d.proxima_dose_manual })),
+      );
+      const ultima = doses.length - 1;
+      const resumo = proxima
+        ? `<p class="proxima">Próxima dose prevista: <strong>${escapar(formatarDataBR(proxima))}</strong></p>`
+        : '';
+      return `<h4>${escapar(tipo.nome)}</h4>${resumo}${tabela(
         ['Dose', 'Data', 'Próxima', 'Lote', 'Veterinário'],
-        doses.map((d) => [
+        doses.map((d, i) => [
           d.rotulo,
           formatarDataBR(d.data_aplicacao),
-          formatarDataBR(d.proxima_dose_manual),
+          formatarDataBR(i === ultima ? proxima : d.proxima_dose_manual),
           d.lote,
           d.veterinario,
         ]),
@@ -126,6 +136,7 @@ const ESTILO = `
   table.lista th, table.lista td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; vertical-align: top; font-size: 10pt; }
   table.lista th { background: #f1f5f9; }
   .vazio { color: #64748b; margin: 4px 0; }
+  .proxima { margin: 2px 0 6px; }
   .rodape { margin-top: 20px; font-size: 9pt; color: #64748b; }
 `;
 

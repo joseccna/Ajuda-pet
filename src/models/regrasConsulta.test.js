@@ -39,6 +39,18 @@ describe('separarConsultas', () => {
   it('sem consulta futura, não há próxima', () => {
     expect(separarConsultas([c('x', '2026-01-01')], HOJE).proxima).toBeNull();
   });
+  it('consulta de hoje com a hora já passada vai para o histórico', () => {
+    const r = separarConsultas(lista, HOJE, '23:22');
+    expect(r.proxima.id).toBe('e');
+    expect(r.historico.map((x) => x.id)).toEqual(['d', 'a', 'c']);
+    // Antes da hora, continua como próxima.
+    expect(separarConsultas(lista, HOJE, '08:00').proxima.id).toBe('d');
+  });
+  it('consulta de hoje sem hora continua agendada até o fim do dia', () => {
+    const r = separarConsultas([c('s', HOJE)], HOJE, '23:59');
+    expect(r.proxima.id).toBe('s');
+    expect(r.historico).toEqual([]);
+  });
 });
 
 describe('textoQuando', () => {

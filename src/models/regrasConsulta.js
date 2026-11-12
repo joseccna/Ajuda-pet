@@ -23,13 +23,29 @@ function ordemCronologica(a, b) {
   return (a.hora || '99:99') < (b.hora || '99:99') ? -1 : 1;
 }
 
+/** "14:30" a partir de uma data, para comparar com a hora das consultas. */
+export function horaDe(data) {
+  return `${String(data.getHours()).padStart(2, '0')}:${String(data.getMinutes()).padStart(2, '0')}`;
+}
+
 /**
- * Separa as consultas: "agendadas" (de hoje em diante, da mais próxima para a mais distante)
- * e "historico" (antes de hoje, da mais recente para a mais antiga).
+ * A consulta já aconteceu? Antes de hoje, sim. Hoje, só se tem hora e ela já passou
+ * (sem hora não dá para saber, então ela continua como agendada até o fim do dia).
  */
-export function separarConsultas(consultas, hojeISO) {
-  const agendadas = consultas.filter((c) => c.data >= hojeISO).sort(ordemCronologica);
-  const historico = consultas.filter((c) => c.data < hojeISO).sort((a, b) => ordemCronologica(b, a));
+export function jaAconteceu(consulta, hojeISO, horaAgora = '') {
+  if (consulta.data < hojeISO) return true;
+  if (consulta.data > hojeISO) return false;
+  return Boolean(consulta.hora && horaAgora && consulta.hora < horaAgora);
+}
+
+/**
+ * Separa as consultas: "agendadas" (as que ainda vão acontecer, da mais próxima para a mais
+ * distante) e "historico" (as que já aconteceram, da mais recente para a mais antiga).
+ */
+export function separarConsultas(consultas, hojeISO, horaAgora = '') {
+  const passou = (c) => jaAconteceu(c, hojeISO, horaAgora);
+  const agendadas = consultas.filter((c) => !passou(c)).sort(ordemCronologica);
+  const historico = consultas.filter(passou).sort((a, b) => ordemCronologica(b, a));
   return { proxima: agendadas[0] ?? null, agendadas, historico };
 }
 

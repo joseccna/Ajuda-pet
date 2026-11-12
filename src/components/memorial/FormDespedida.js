@@ -82,6 +82,7 @@ export function FormDespedida({ pet, aoSalvar, aoAgoraNao }) {
         rotulo="Mensagem de homenagem"
         multilinha
         placeholder={`Escreva algumas palavras sobre ${pet.nome}`}
+        guia
         maxLength={LIMITE_HOMENAGEM}
         value={e.mensagem}
         onChangeText={(t) => {
@@ -94,7 +95,7 @@ export function FormDespedida({ pet, aoSalvar, aoAgoraNao }) {
 
       <View style={[styles.nota, { backgroundColor: paleta.destaqueSuave }]}>
         <Texto variante="legenda" cor="destaque">
-          Os lembretes {pet.deNome} ficam pausados e ele(a) sai da lista de pets. Nada é apagado: as fotos, a
+          Os lembretes {pet.deNome} ficam pausados e {pet.nome} sai da lista de pets. Nada é apagado: as fotos, a
           carteirinha e o histórico continuam guardados, e você pode desfazer isso quando quiser.
         </Texto>
       </View>

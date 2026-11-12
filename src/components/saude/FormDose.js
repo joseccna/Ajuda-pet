@@ -143,6 +143,7 @@ export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
       <Campo
         rotulo="Próxima dose"
         placeholder={calculada ?? 'Sem previsão'}
+        guia
         keyboardType="number-pad"
         maxLength={10}
         value={e.proxima}
