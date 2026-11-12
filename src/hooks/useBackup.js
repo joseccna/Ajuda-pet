@@ -12,6 +12,7 @@ export function useSituacaoBackup() {
 /**
  * Gerar e compartilhar o backup. fase: ocioso | gerando | pronto | erro.
  * Depois de compartilhar, a data do backup é registrada (o lembrete recomeça a contar).
+ * O Android não informa se a pessoa salvou ou cancelou: o app só sabe que a janela fechou.
  */
 export function useBackup() {
   const [fase, setFase] = useState('ocioso');
