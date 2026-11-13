@@ -45,6 +45,24 @@ export function minutosDeSegundos(segundos) {
   return Math.max(1, Math.round(segundos / 60));
 }
 
+/** Segundos de um passeio concluído (os antigos, só com minutos, viram minutos × 60). */
+export function duracaoSegundos(passeio) {
+  if (passeio.duracaoS !== null && passeio.duracaoS !== undefined) return passeio.duracaoS;
+  return (passeio.duracaoMin ?? 0) * 60;
+}
+
+/** 10 em "10 s"; 100 em "1 min 40 s"; 1440 em "24 min"; 6300 em "1h45". */
+export function formatarDuracaoSegundos(segundos) {
+  const s = Math.max(0, Math.round(segundos));
+  if (s < 60) return `${s} s`;
+  if (s < 3600) {
+    const m = Math.floor(s / 60);
+    const resto = s % 60;
+    return resto === 0 ? `${m} min` : `${m} min ${resto} s`;
+  }
+  return formatarDuracao(Math.round(s / 60));
+}
+
 /** Data (local) em que o passeio começou. */
 export function dataDoPasseio(passeio) {
   return paraISO(new Date(passeio.inicio));
@@ -56,11 +74,12 @@ export function inicioDaSemana(dataISO) {
   return somarDias(dataISO, -((diaDaSemana + 6) % 7));
 }
 
-/** Minutos de passeio concluídos em um dia. */
+/** Minutos de passeio concluídos em um dia (soma os segundos e só então arredonda). */
 export function minutosDoDia(passeios, dataISO) {
-  return passeios
+  const segundos = passeios
     .filter((p) => !p.emAndamento && dataDoPasseio(p) === dataISO)
-    .reduce((soma, p) => soma + (p.duracaoMin ?? 0), 0);
+    .reduce((soma, p) => soma + duracaoSegundos(p), 0);
+  return Math.round(segundos / 60);
 }
 
 /** Os sete dias da semana (segunda a domingo) com os minutos de cada um. */

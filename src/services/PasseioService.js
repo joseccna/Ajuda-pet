@@ -7,7 +7,6 @@ import { MarcacaoPasseio } from '../models/MarcacaoPasseio';
 import { Passeio } from '../models/Passeio';
 import {
   formatarDuracao,
-  minutosDeSegundos,
   percentualMeta,
   minutosDoDia,
   segundosDecorridos,
@@ -88,14 +87,14 @@ export class PasseioService {
     return true;
   }
 
-  /** Termina o passeio: fecha a pausa, calcula a duração (mínimo de 1 minuto) e guarda. */
+  /** Termina o passeio: fecha a pausa, calcula a duração em segundos (mínimo de 1) e guarda. */
   finalizar(passeioId, agora = new Date()) {
     const p = this.passeios.buscarPorId(passeioId);
     if (!p) return null;
     if (p.pausadoDesde) this.retomar(passeioId, agora);
     const atual = this.passeios.buscarPorId(passeioId);
     atual.fim = agora.toISOString();
-    atual.duracaoMin = minutosDeSegundos(segundosDecorridos(atual, agora.getTime()));
+    atual.duracaoS = Math.max(1, segundosDecorridos(atual, agora.getTime()));
     atual.emAndamento = false;
     return this.passeios.salvar(atual);
   }

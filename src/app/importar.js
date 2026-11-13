@@ -11,7 +11,7 @@ import { Screen } from '../components/ui/Screen';
 import { Texto } from '../components/ui/Texto';
 import { useImportacao } from '../hooks/useImportacao';
 import { textoDoItem } from '../models/regrasBackup';
-import { formatarDataBR } from '../utils/datas';
+import { formatarDataBR, paraISO } from '../utils/datas';
 import { espaco, raio, useTheme } from '../theme';
 
 const ACAO_PET = {
@@ -24,7 +24,8 @@ const ACAO_PET = {
 function Previa({ previa, aoConfirmar, aoCancelar }) {
   const { paleta } = useTheme();
   const ficha = previa.tipo === 'ficha';
-  const data = formatarDataBR(previa.geradoEm.slice(0, 10));
+  // Data local: a fatia do ISO (UTC) mostraria o dia seguinte para backups feitos depois das 21h.
+  const data = formatarDataBR(paraISO(new Date(previa.geradoEm)));
   return (
     <View>
       <Texto variante="subtitulo" accessibilityRole="header">

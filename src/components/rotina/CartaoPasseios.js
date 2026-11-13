@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { usePasseios } from '../../hooks/useRotina';
-import { formatarDuracao } from '../../models/regrasPasseio';
+import { dataDoPasseio, duracaoSegundos, formatarDuracao, formatarDuracaoSegundos } from '../../models/regrasPasseio';
 import { passeioService } from '../../services/PasseioService';
 import { espaco, useTheme } from '../../theme';
 import { formatarDataCurta } from '../../utils/datas';
@@ -54,8 +54,9 @@ export function CartaoPasseios({ pet, irPara }) {
       </View>
       {ultimo ? (
         <Texto variante="legenda" style={{ marginBottom: espaco.md }}>
-          Último passeio: {formatarDataCurta(ultimo.inicio.slice(0, 10))},{' '}
-          {formatarDuracao(ultimo.duracaoMin)}
+          {/* Data local (como no histórico): a fatia do ISO em UTC virava o dia seguinte depois das 21h. */}
+          Último passeio: {formatarDataCurta(dataDoPasseio(ultimo))},{' '}
+          {formatarDuracaoSegundos(duracaoSegundos(ultimo))}
         </Texto>
       ) : (
         <Texto variante="legenda" style={{ marginBottom: espaco.md }}>

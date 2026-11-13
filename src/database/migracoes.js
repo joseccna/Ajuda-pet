@@ -376,4 +376,10 @@ export const MIGRACOES = [
   ALTER TABLE configuracao_app ADD COLUMN lembrete_backup_dias INTEGER NOT NULL DEFAULT 30;
   ALTER TABLE configuracao_app ADD COLUMN ultimo_backup_em TEXT;
   `,
+  // 11: duração do passeio em segundos (um passeio de 10 s não vira mais "1 min").
+  // duracao_min continua, arredondado, para quem ainda lê minutos.
+  `
+  ALTER TABLE passeios ADD COLUMN duracao_s INTEGER;
+  UPDATE passeios SET duracao_s = duracao_min * 60 WHERE duracao_min IS NOT NULL;
+  `,
 ];

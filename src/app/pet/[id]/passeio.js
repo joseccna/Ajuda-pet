@@ -14,8 +14,10 @@ import { usePet } from '../../../hooks/usePet';
 import { usePreferencias } from '../../../hooks/usePreferencias';
 import {
   MARCACOES,
+  duracaoSegundos,
   formatarCronometro,
   formatarDuracao,
+  formatarDuracaoSegundos,
   percentualMeta,
   segundosDecorridos,
 } from '../../../models/regrasPasseio';
@@ -183,7 +185,7 @@ export default function PasseioDoPet() {
         <View style={styles.centro}>
           <Avatar uri={pet.fotoUri} nome={pet.nome} tamanho={80} />
           <Texto variante="titulo" style={{ fontFamily: fontes.titulo }}>
-            {formatarDuracao(passeio.duracaoMin ?? 1)}
+            {formatarDuracaoSegundos(duracaoSegundos(passeio))}
           </Texto>
           {marcacoes.length > 0 ? (
             <Texto variante="legenda">

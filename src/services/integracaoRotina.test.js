@@ -187,6 +187,15 @@ suite('integração da rotina com o SQLite', () => {
       passeios.excluir(p.id);
     });
 
+    it('passeio de 10 segundos fica com 10 segundos e pode ser concluído', () => {
+      const p = passeios.iniciar(luna.id, em(21, 0));
+      const feito = passeios.finalizar(p.id, new Date(em(21, 0).getTime() + 10000));
+      expect(feito.duracaoS).toBe(10);
+      passeios.concluirDetalhes(p.id, { distanciaKm: null, observacao: '' });
+      expect(passeios.buscar(p.id).duracaoS).toBe(10);
+      passeios.excluir(p.id);
+    });
+
     it('completa com distância e observação, e valida', () => {
       passeios.concluirDetalhes(passeioId, { distanciaKm: 1.8, observacao: 'Parque' });
       const p = passeios.buscar(passeioId);

@@ -12,8 +12,10 @@ import {
 } from './regrasAlimentacao';
 import {
   dataDoPasseio,
+  duracaoSegundos,
   formatarCronometro,
   formatarDuracao,
+  formatarDuracaoSegundos,
   inicioDaSemana,
   minutosDeSegundos,
   minutosDoDia,
@@ -129,6 +131,20 @@ describe('passeios: cronômetro', () => {
     expect(formatarDuracao(60)).toBe('1h');
     expect(minutosDeSegundos(10)).toBe(1);
     expect(minutosDeSegundos(1475)).toBe(25);
+  });
+  it('mostra a duração com segundos, sem arredondar 10 s para 1 min', () => {
+    expect(formatarDuracaoSegundos(10)).toBe('10 s');
+    expect(formatarDuracaoSegundos(100)).toBe('1 min 40 s');
+    expect(formatarDuracaoSegundos(1440)).toBe('24 min');
+    expect(formatarDuracaoSegundos(6300)).toBe('1h45');
+    expect(duracaoSegundos({ duracaoS: 10, duracaoMin: 0 })).toBe(10);
+    // Passeio antigo, só com minutos.
+    expect(duracaoSegundos({ duracaoMin: 25 })).toBe(1500);
+  });
+  it('soma os segundos do dia antes de arredondar para minutos', () => {
+    const curto = (s) => ({ inicio: t(9, 0), duracaoS: s, emAndamento: false });
+    // Três passeios de 40 s = 2 min (antes, cada um contava 1 min: 3 min).
+    expect(minutosDoDia([curto(40), curto(40), curto(40)], '2026-10-02')).toBe(2);
   });
 });
 

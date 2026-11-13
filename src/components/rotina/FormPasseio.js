@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { mascararHora, lerHora } from '../../models/regrasConsulta';
+import { formatarDuracaoSegundos } from '../../models/regrasPasseio';
 import { useConfirmarSaida } from '../../hooks/useConfirmarSaida';
 import { ErroValidacaoPasseio, passeioService } from '../../services/PasseioService';
 import { formatarDataBR, lerDataBR, mascararDataBR, paraISO } from '../../utils/datas';
@@ -29,7 +30,8 @@ export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
       return {
         data: formatarDataBR(paraISO(d)),
         hora: `${dois(d.getHours())}:${dois(d.getMinutes())}`,
-        duracao: passeio.duracaoMin ? String(passeio.duracaoMin) : '',
+        // Menos de 1 minuto fica vazio: os segundos são mantidos se a duração não for mexida.
+        duracao: passeio.duracaoS >= 60 ? String(passeio.duracaoMin) : '',
         distancia: passeio.distanciaKm !== null ? String(passeio.distanciaKm).replace('.', ',') : '',
         observacao: passeio.observacao,
       };
@@ -79,9 +81,10 @@ export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
         const inicio = new Date(a, m - 1, d, h, mi, 0);
         const item = passeio.copia();
         item.inicio = inicio.toISOString();
-        item.duracaoMin = duracaoMin;
+        // Duração não mexida: mantém os segundos exatos do cronômetro.
+        if (e.duracao !== inicial.duracao) item.duracaoMin = duracaoMin;
         item.fim = new Date(
-          inicio.getTime() + (Number.isFinite(duracaoMin) ? duracaoMin : 0) * 60000,
+          inicio.getTime() + (Number.isFinite(item.duracaoS) ? item.duracaoS : 0) * 1000,
         ).toISOString();
         item.distanciaKm = distanciaKm;
         item.observacao = e.observacao;
@@ -150,6 +153,11 @@ export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
         value={e.duracao}
         onChangeText={(t) => mudar('duracao', t.replace(/\D/g, ''))}
         erro={erros.duracaoMin}
+        dica={
+          editando && passeio.duracaoS % 60 !== 0
+            ? `Registrado pelo cronômetro: ${formatarDuracaoSegundos(passeio.duracaoS)}. Deixe como está para manter.`
+            : undefined
+        }
       />
       <Campo
         rotulo="Distância (km)"

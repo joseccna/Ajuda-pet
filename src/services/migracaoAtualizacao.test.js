@@ -15,6 +15,22 @@ import { MIGRACOES } from '../database/migracoes';
 const temSqlite = Boolean(process.getBuiltinModule?.('node:sqlite'));
 const suite = temSqlite ? describe : describe.skip;
 
+suite('migração 11: duração dos passeios em segundos', () => {
+  it('preenche duracao_s dos passeios antigos com minutos × 60', () => {
+    const { DatabaseSync } = process.getBuiltinModule('node:sqlite');
+    const banco = new DatabaseSync(':memory:');
+    banco.exec(`CREATE TABLE passeios (id TEXT PRIMARY KEY, duracao_min INTEGER, em_andamento INTEGER)`);
+    banco.exec(`INSERT INTO passeios VALUES ('feito', 25, 0), ('andando', NULL, 1)`);
+    banco.exec(MIGRACOES[10]);
+    const linhas = banco.prepare('SELECT id, duracao_s FROM passeios ORDER BY id').all();
+    expect(linhas.map((l) => [l.id, l.duracao_s])).toEqual([
+      ['andando', null],
+      ['feito', 1500],
+    ]);
+    banco.close();
+  });
+});
+
 suite('atualização do banco da versão 3 para a mais recente', () => {
   let db;
 

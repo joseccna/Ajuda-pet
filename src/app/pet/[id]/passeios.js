@@ -8,7 +8,7 @@ import { EstadoVazio } from '../../../components/ui/EstadoVazio';
 import { Screen } from '../../../components/ui/Screen';
 import { Texto } from '../../../components/ui/Texto';
 import { usePet } from '../../../hooks/usePet';
-import { formatarDuracao } from '../../../models/regrasPasseio';
+import { duracaoSegundos, formatarDuracaoSegundos } from '../../../models/regrasPasseio';
 import { passeioService } from '../../../services/PasseioService';
 import { espaco, raio, useTheme } from '../../../theme';
 import { formatarDataCurta, paraISO } from '../../../utils/datas';
@@ -57,7 +57,7 @@ export default function HistoricoDePasseios() {
                     router.push({ pathname: '/pet/[id]/passeio-registro', params: { id, passeioId: p.id } })
                   }
                   accessibilityRole="button"
-                  accessibilityLabel={`${data}, ${formatarDuracao(p.duracaoMin)}${detalhe ? `, ${detalhe}` : ''}`}
+                  accessibilityLabel={`${data}, ${formatarDuracaoSegundos(duracaoSegundos(p))}${detalhe ? `, ${detalhe}` : ''}`}
                   accessibilityHint="Abre o passeio para editar"
                   style={[styles.linha, i > 0 && { borderTopWidth: 1, borderTopColor: paleta.linha }]}
                 >
@@ -65,7 +65,7 @@ export default function HistoricoDePasseios() {
                     <Texto variante="corpoMedio">{data}</Texto>
                     {detalhe ? <Texto variante="legenda">{detalhe}</Texto> : null}
                   </View>
-                  <Texto variante="corpoMedio">{formatarDuracao(p.duracaoMin)}</Texto>
+                  <Texto variante="corpoMedio">{formatarDuracaoSegundos(duracaoSegundos(p))}</Texto>
                   <Ionicons name="chevron-forward" size={18} color={paleta.textoSuave} />
                 </Pressable>
               );
