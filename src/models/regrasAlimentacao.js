@@ -80,6 +80,51 @@ export function refeicoesDoDia(plano, registros, agora) {
   });
 }
 
+/** Dias à frente com avisos de refeição agendados (o app reagenda ao abrir e ao marcar). */
+export const DIAS_AVISOS_REFEICAO = 7;
+/** Quantos minutos depois do horário vem o segundo aviso, se a refeição não foi marcada. */
+export const MINUTOS_SEGUNDO_AVISO_REFEICAO = 60;
+
+/**
+ * Notificações das refeições: na hora de cada refeição e, se ela não for marcada,
+ * outra 1 hora depois. Hoje, pula as já marcadas e as de antes da criação do plano.
+ * planos: [{ plano, petNome, deNome, rota, marcadasHoje: [registros] }] (só os com lembretes ligados).
+ */
+export function planejarAvisosRefeicao(planos, agora, dias = DIAS_AVISOS_REFEICAO) {
+  const itens = [];
+  const hojeISO = paraISO(agora);
+  for (const { plano, deNome, rota, marcadasHoje } of planos) {
+    const hoje = refeicoesDoDia(plano, marcadasHoje, agora);
+    for (let d = 0; d < dias; d++) {
+      const dia = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + d, 12, 0, 0);
+      const dataISO = paraISO(dia);
+      if (plano.inicio && dataISO < plano.inicio) continue;
+      for (const horario of plano.horarios) {
+        if (dataISO === hojeISO) {
+          const r = hoje.find((x) => x.horario === horario);
+          if (r && (r.feita || r.antesDoPlano)) continue;
+        }
+        const [h, m] = horario.split(':').map(Number);
+        const naHora = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), h, m, 0, 0);
+        const depois = new Date(naHora.getTime() + MINUTOS_SEGUNDO_AVISO_REFEICAO * 60000);
+        const base = { titulo: `Refeição ${deNome}`, rota: rota ?? null };
+        if (naHora > agora) {
+          itens.push({ ...base, chave: `${plano.id}|${dataISO}|${horario}|hora`, quando: naHora, corpo: `Hora da refeição das ${horario}` });
+        }
+        if (depois > agora) {
+          itens.push({
+            ...base,
+            chave: `${plano.id}|${dataISO}|${horario}|depois`,
+            quando: depois,
+            corpo: `A refeição das ${horario} ainda não foi marcada`,
+          });
+        }
+      }
+    }
+  }
+  return itens.sort((a, b) => a.quando - b.quando || a.chave.localeCompare(b.chave));
+}
+
 /** Refeições não feitas cujo horário já passou ou chega na próxima hora (candidatas a lembrete). */
 export function refeicoesParaLembrar(refeicoes, agora) {
   const fimDoDia = new Date(agora);

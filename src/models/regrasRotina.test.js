@@ -8,6 +8,7 @@ import {
   racaoDiariaG,
   refeicoesDoDia,
   refeicoesParaLembrar,
+  planejarAvisosRefeicao,
   textoEstoque,
 } from './regrasAlimentacao';
 import {
@@ -113,6 +114,31 @@ describe('alimentação: refeições do dia', () => {
     // Criado ao meio-dia: só o café da manhã fica de fora.
     const meioDia = { ...plano, criadoEm: new Date(2026, 9, 2, 12, 0).toISOString() };
     expect(refeicoesDoDia(meioDia, [], agora).map((x) => x.antesDoPlano)).toEqual([true, false, false]);
+  });
+  it('avisa na hora da refeição e 1 hora depois, pulando as já marcadas', () => {
+    // 2026-10-02 às 14:30: 08:00 marcada; 13:00 passou há 1h30 (os dois avisos já passaram); 19:00 pendente
+    const p = { id: 'p1', inicio: '2026-09-01', horarios: plano.horarios };
+    const itens = planejarAvisosRefeicao(
+      [{ plano: p, deNome: 'do Thor', rota: null, marcadasHoje: [{ horario: '08:00' }] }],
+      agora,
+      2,
+    );
+    expect(itens.map((i) => [i.quando.getTime(), i.corpo])).toEqual([
+      [new Date(2026, 9, 2, 19, 0).getTime(), 'Hora da refeição das 19:00'],
+      [new Date(2026, 9, 2, 20, 0).getTime(), 'A refeição das 19:00 ainda não foi marcada'],
+      [new Date(2026, 9, 3, 8, 0).getTime(), 'Hora da refeição das 08:00'],
+      [new Date(2026, 9, 3, 9, 0).getTime(), 'A refeição das 08:00 ainda não foi marcada'],
+      [new Date(2026, 9, 3, 13, 0).getTime(), 'Hora da refeição das 13:00'],
+      [new Date(2026, 9, 3, 14, 0).getTime(), 'A refeição das 13:00 ainda não foi marcada'],
+      [new Date(2026, 9, 3, 19, 0).getTime(), 'Hora da refeição das 19:00'],
+      [new Date(2026, 9, 3, 20, 0).getTime(), 'A refeição das 19:00 ainda não foi marcada'],
+    ]);
+    expect(itens[0].titulo).toBe('Refeição do Thor');
+  });
+  it('refeição que passou há menos de 1 hora ainda recebe o segundo aviso', () => {
+    const p = { id: 'p1', inicio: '2026-09-01', horarios: ['14:00'] };
+    const itens = planejarAvisosRefeicao([{ plano: p, deNome: 'do Thor', marcadasHoje: [] }], agora, 1);
+    expect(itens.map((i) => i.corpo)).toEqual(['A refeição das 14:00 ainda não foi marcada']);
   });
   it('perto da meia-noite não passa de 23:59', () => {
     const tarde = new Date(2026, 9, 2, 23, 30);

@@ -1,6 +1,7 @@
 import { planejarNotificacoes } from '../models/regrasAgenda';
 import { planejarLembreteBackup } from '../models/regrasBackup';
 import { agendaService } from './AgendaService';
+import { alimentacaoService } from './AlimentacaoService';
 import { preferenciasService } from './PreferenciasService';
 
 const CANAL = 'lembretes';
@@ -33,9 +34,15 @@ function carregarNativo() {
  * as dos próximos dias, a partir dos eventos da agenda. Só funciona com a permissão do usuário.
  */
 export class NotificacaoService {
-  constructor(agenda = agendaService, nativo = undefined, preferencias = preferenciasService) {
+  constructor(
+    agenda = agendaService,
+    nativo = undefined,
+    preferencias = preferenciasService,
+    alimentacao = alimentacaoService,
+  ) {
     this.agenda = agenda;
     this.preferencias = preferencias;
+    this.alimentacao = alimentacao;
     this._nativo = nativo;
     this.ocupado = false;
     this.pendente = false;
@@ -150,7 +157,20 @@ export class NotificacaoService {
           trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: backup.quando, channelId: CANAL },
         });
       }
-      return { agendadas: plano.length + (backup ? 1 : 0) };
+      // Refeições: na hora e, se não for marcada, 1 hora depois.
+      let refeicoes = [];
+      try {
+        refeicoes = this.alimentacao ? this.alimentacao.avisos(agora) : [];
+      } catch {
+        refeicoes = [];
+      }
+      for (const item of refeicoes) {
+        await N.scheduleNotificationAsync({
+          content: { title: item.titulo, body: item.corpo, data: { rota: item.rota } },
+          trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: item.quando, channelId: CANAL },
+        });
+      }
+      return { agendadas: plano.length + (backup ? 1 : 0) + refeicoes.length };
     } catch {
       return { agendadas: 0 };
     } finally {

@@ -9,6 +9,7 @@
  * @property {string} titulo   "V8 da Luna"
  * @property {string} texto    "Atrasada, 5 dias"
  * @property {number} dias     dias até a data (negativo = atrasado, 0 = hoje)
+ * @property {boolean} [atrasado] de hoje, mas o horário já passou (ex.: refeição não marcada)
  * @property {string} data     data ISO
  * @property {string} icone    nome de ícone Ionicons
  * @property {{pathname: string, params: Object}} rota  para onde ir ao tocar
@@ -23,7 +24,7 @@ export function criarLembrete(dados) {
 
 /** atrasado | hoje | em-breve (define a cor do lembrete). */
 export function estadoDoLembrete(lembrete) {
-  if (lembrete.dias < 0) return 'atrasado';
+  if (lembrete.dias < 0 || lembrete.atrasado) return 'atrasado';
   if (lembrete.dias === 0) return 'hoje';
   return 'em-breve';
 }

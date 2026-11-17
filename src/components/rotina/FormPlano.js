@@ -7,6 +7,7 @@ import { mascararHora } from '../../models/regrasConsulta';
 import { lerPeso } from '../../models/regrasPeso';
 import { useConfirmarSaida } from '../../hooks/useConfirmarSaida';
 import { alimentacaoService, ErroValidacaoPlano } from '../../services/AlimentacaoService';
+import { notificacaoService } from '../../services/NotificacaoService';
 import { ALVO_MINIMO, espaco, raio, useTheme } from '../../theme';
 import { formatarDataBR, lerDataBR, mascararDataBR, paraISO } from '../../utils/datas';
 import { Button } from '../ui/Button';
@@ -109,6 +110,7 @@ export function FormPlano({ pet, plano, aoSalvar }) {
       } else {
         alimentacaoService.criarPlano(new PlanoAlimentar({ petId: pet.id, ...dados }));
       }
+      notificacaoService.reagendarEmBreve(); // horários das refeições podem ter mudado
       liberarSaida();
       aoSalvar();
     } catch (erro) {

@@ -101,12 +101,22 @@ suite('integração da rotina com o SQLite', () => {
     it('lembra da refeição pendente e some ao marcar', () => {
       const plano = alimentacao.planoVigente(luna.id);
       expect(alimentacao.lembretes(em(14, 30)).map((l) => l.titulo)).toEqual(['Refeição da Luna']);
-      expect(alimentacao.lembretes(em(14, 30))[0].texto).toBe('Hoje, 08:00');
+      expect(alimentacao.lembretes(em(14, 30))[0].texto).toBe('Passou das 08:00, ainda não marcada');
+      expect(alimentacao.lembretes(em(14, 30))[0].atrasado).toBe(true);
 
       alimentacao.alternarRefeicao(plano, '08:00', HOJE);
       expect(alimentacao.lembretes(em(14, 30))).toEqual([]);
       expect(alimentacao.lembretes(em(18, 15)).map((l) => l.texto)).toEqual(['Hoje, 19:00']);
       expect(alimentacao.lembretes(em(6, 0))).toEqual([]);
+    });
+
+    it('agenda avisos das refeições não marcadas', () => {
+      // 08:00 já marcada no teste anterior; às 18:15 restam os dois avisos das 19:00 de hoje
+      const hoje = alimentacao.avisos(em(18, 15)).filter((a) => a.quando.getDate() === 2);
+      expect(hoje.map((a) => a.corpo)).toEqual([
+        'Hora da refeição das 19:00',
+        'A refeição das 19:00 ainda não foi marcada',
+      ]);
     });
 
     it('lembretes desligados não aparecem', () => {

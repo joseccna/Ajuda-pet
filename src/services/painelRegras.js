@@ -1,4 +1,4 @@
-import { DIAS_PROXIMOS } from '../models/Lembrete';
+import { DIAS_PROXIMOS, estadoDoLembrete } from '../models/Lembrete';
 
 /**
  * Organiza os lembretes de todos os módulos para o painel do dia:
@@ -7,7 +7,11 @@ import { DIAS_PROXIMOS } from '../models/Lembrete';
  * - porPet: quantos pendentes e quantos atrasados cada pet tem
  */
 export function organizarPainel(lembretes) {
-  const porDias = (a, b) => a.dias - b.dias || a.titulo.localeCompare(b.titulo, 'pt-BR');
+  // No mesmo dia, o que já passou do horário vem antes.
+  const porDias = (a, b) =>
+    a.dias - b.dias ||
+    Number(Boolean(b.atrasado)) - Number(Boolean(a.atrasado)) ||
+    a.titulo.localeCompare(b.titulo, 'pt-BR');
 
   const hoje = lembretes.filter((l) => l.dias <= 0).sort(porDias);
   const proximos = lembretes.filter((l) => l.dias > 0 && l.dias <= DIAS_PROXIMOS).sort(porDias);
@@ -16,7 +20,7 @@ export function organizarPainel(lembretes) {
   for (const l of [...hoje, ...proximos]) {
     const atual = porPet[l.petId] ?? { pendentes: 0, atrasados: 0 };
     atual.pendentes += 1;
-    if (l.dias < 0) atual.atrasados += 1;
+    if (estadoDoLembrete(l) === 'atrasado') atual.atrasados += 1;
     porPet[l.petId] = atual;
   }
   return { hoje, proximos, porPet };

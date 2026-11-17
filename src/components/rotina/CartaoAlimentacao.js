@@ -5,6 +5,7 @@ import { DeviceIdentity } from '../../database/DeviceIdentity';
 import { useAlimentacao } from '../../hooks/useRotina';
 import { textoEstoque } from '../../models/regrasAlimentacao';
 import { alimentacaoService } from '../../services/AlimentacaoService';
+import { notificacaoService } from '../../services/NotificacaoService';
 import { espaco, fontes, useTheme } from '../../theme';
 import { paraISO } from '../../utils/datas';
 import { Button } from '../ui/Button';
@@ -35,6 +36,8 @@ export function CartaoAlimentacao({ pet, irPara }) {
   const alternar = (horario) => {
     alimentacaoService.alternarRefeicao(plano, horario);
     recarregar();
+    // Marcada: cancela o aviso de "ainda não foi marcada".
+    notificacaoService.reagendarEmBreve();
   };
 
   return (

@@ -4,7 +4,11 @@ import { PlanoAlimentarRepository } from '../database/repositories/PlanoAlimenta
 import { RefeicaoRegistroRepository } from '../database/repositories/RefeicaoRegistroRepository';
 import { criarLembrete } from '../models/Lembrete';
 import { RefeicaoRegistro } from '../models/RefeicaoRegistro';
-import { refeicoesDoDia, refeicoesParaLembrar } from '../models/regrasAlimentacao';
+import {
+  planejarAvisosRefeicao,
+  refeicoesDoDia,
+  refeicoesParaLembrar,
+} from '../models/regrasAlimentacao';
 import { paraISO, somarDias } from '../utils/datas';
 
 export class ErroValidacaoPlano extends Error {
@@ -93,6 +97,24 @@ export class AlimentacaoService {
     return true;
   }
 
+  /** Notificações das refeições dos próximos dias (planos com lembretes ligados, de pets ativos). */
+  avisos(agora = new Date()) {
+    const pets = new Map(this.pets.listarAtivos().map((p) => [p.id, p]));
+    const marcadas = this.refeicoes.doDiaDeTodos(paraISO(agora));
+    const planos = [];
+    for (const plano of this.planos.vigentesDePetsAtivos()) {
+      const pet = pets.get(plano.petId);
+      if (!pet || !plano.lembretes) continue;
+      planos.push({
+        plano,
+        deNome: pet.deNome,
+        rota: { pathname: '/pet/[id]', params: { id: pet.id, aba: 'rotina' } },
+        marcadasHoje: marcadas.filter((m) => m.planoId === plano.id),
+      });
+    }
+    return planejarAvisosRefeicao(planos, agora);
+  }
+
   /** Refeições de hoje que ainda não foram feitas e já passaram ou chegam na próxima hora. */
   lembretes(hoje = new Date()) {
     const dataISO = paraISO(hoje);
@@ -112,8 +134,9 @@ export class AlimentacaoService {
             petId: pet.id,
             petNome: pet.nome,
             titulo: `Refeição ${pet.deNome}`,
-            texto: `Hoje, ${r.horario}`,
+            texto: r.passou ? `Passou das ${r.horario}, ainda não marcada` : `Hoje, ${r.horario}`,
             dias: 0,
+            atrasado: r.passou,
             data: dataISO,
             icone: 'restaurant-outline',
             rota: { pathname: '/pet/[id]', params: { id: pet.id, aba: 'rotina' } },

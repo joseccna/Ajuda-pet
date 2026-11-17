@@ -29,6 +29,15 @@ describe('organizarPainel', () => {
     expect(painel.porPet.thor).toEqual({ pendentes: 1, atrasados: 0 });
     expect(painel.porPet.luna).toEqual({ pendentes: 1, atrasados: 0 });
   });
+  it('refeição de hoje que passou do horário fica em destaque e vem antes', () => {
+    const p = organizarPainel([
+      l('thor', 'A refeição das 19:00', 0),
+      { ...l('thor', 'Refeição das 08:00', 0), atrasado: true },
+    ]);
+    expect(p.hoje.map((x) => x.titulo)).toEqual(['Refeição das 08:00', 'A refeição das 19:00']);
+    expect(estadoDoLembrete(p.hoje[0])).toBe('atrasado');
+    expect(p.porPet.thor).toEqual({ pendentes: 2, atrasados: 1 });
+  });
 });
 
 describe('descreverPendencias', () => {
