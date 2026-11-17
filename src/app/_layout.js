@@ -53,7 +53,10 @@ export default function RaizLayout() {
   // Notificações: configura ao abrir e agenda de novo ao abrir e ao voltar para o app.
   useEffect(() => {
     if (!bancoPronto) return undefined;
-    notificacaoService.configurar().then(() => notificacaoService.reagendar());
+    notificacaoService
+      .configurar()
+      .then(() => notificacaoService.pedirNaPrimeiraVez())
+      .then(() => notificacaoService.reagendar());
     const assinatura = AppState.addEventListener('change', (estado) => {
       if (estado === 'active') notificacaoService.reagendarEmBreve();
     });

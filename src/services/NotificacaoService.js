@@ -95,6 +95,22 @@ export class NotificacaoService {
     return this.estado();
   }
 
+  /**
+   * Na primeira abertura do app, pede a permissão de notificação (como outros apps fazem).
+   * Pede uma vez só: depois, quem quiser ativar usa o botão da Agenda.
+   */
+  async pedirNaPrimeiraVez() {
+    if (this.preferencias.obter().notificacaoPedida) return;
+    try {
+      const atual = await this.estado();
+      if (!atual.disponivel) return;
+      if (!atual.permitido && atual.podePedir) await this.pedirPermissao();
+      this.preferencias.salvar({ notificacaoPedida: true });
+    } catch {
+      // Sem notificações neste ambiente: o app continua funcionando.
+    }
+  }
+
   /** Apaga as notificações agendadas e agenda de novo as dos próximos 90 dias. */
   async reagendar(agora = new Date()) {
     const N = this.nativo;

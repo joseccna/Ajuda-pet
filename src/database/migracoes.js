@@ -382,4 +382,8 @@ export const MIGRACOES = [
   ALTER TABLE passeios ADD COLUMN duracao_s INTEGER;
   UPDATE passeios SET duracao_s = duracao_min * 60 WHERE duracao_min IS NOT NULL;
   `,
+  // 12: o app já pediu a permissão de notificação na primeira abertura?
+  `
+  ALTER TABLE configuracao_app ADD COLUMN notificacao_pedida INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

@@ -39,6 +39,7 @@ describe('normalizar', () => {
       atalhos: ['peso', 'passeio'],
       lembreteBackupDias: 30,
       ultimoBackupEm: null,
+      notificacaoPedida: false,
     });
   });
   it('valores inválidos voltam ao padrão', () => {

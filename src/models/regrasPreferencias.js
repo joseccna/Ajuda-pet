@@ -31,6 +31,8 @@ export const PADROES = {
   atalhos: [...ATALHOS_DISPONIVEIS],
   lembreteBackupDias: 30,
   ultimoBackupEm: null,
+  /** O app já pediu a permissão de notificação na primeira abertura? */
+  notificacaoPedida: false,
 };
 
 /** Lista de atalhos sem repetidos nem chaves desconhecidas; se ficar vazia, volta ao padrão. */
@@ -68,6 +70,7 @@ export function normalizar(entrada = {}) {
       typeof entrada.ultimoBackupEm === 'string' && !Number.isNaN(Date.parse(entrada.ultimoBackupEm))
         ? entrada.ultimoBackupEm
         : null,
+    notificacaoPedida: entrada.notificacaoPedida === true,
   };
 }
 

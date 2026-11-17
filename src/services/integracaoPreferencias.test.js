@@ -188,6 +188,23 @@ suite('preferências com o SQLite', () => {
       preferenciasService.salvar({ horarioPadrao: '09:00', antecedenciaDias: 3 });
     });
 
+    it('pede a permissão de notificação só na primeira abertura', async () => {
+      const nativo = {
+        getPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })),
+        requestPermissionsAsync: jest.fn(async () => ({ granted: true })),
+      };
+      const servico = new NotificacaoService({ proximos: () => [] }, nativo);
+      expect(preferenciasService.obter().notificacaoPedida).toBe(false);
+
+      await servico.pedirNaPrimeiraVez();
+      expect(nativo.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+      expect(preferenciasService.obter().notificacaoPedida).toBe(true);
+
+      // Abriu de novo (recusou da primeira vez): não pergunta outra vez.
+      await servico.pedirNaPrimeiraVez();
+      expect(nativo.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+    });
+
     it('a unidade de peso vale no cartão de emergência', () => {
       const emergencia = new EmergenciaService();
       new TutorService().salvar(new Tutor({ nome: 'Ana' }));

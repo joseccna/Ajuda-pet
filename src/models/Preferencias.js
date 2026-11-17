@@ -20,6 +20,7 @@ export class Preferencias extends BaseModel {
     this.atalhos = v.atalhos;
     this.lembreteBackupDias = v.lembreteBackupDias;
     this.ultimoBackupEm = v.ultimoBackupEm;
+    this.notificacaoPedida = v.notificacaoPedida;
   }
 
   /** Os valores como objeto simples, para usar nas telas e nos serviços. */
@@ -34,6 +35,7 @@ export class Preferencias extends BaseModel {
       atalhos: this.atalhos,
       lembreteBackupDias: this.lembreteBackupDias,
       ultimoBackupEm: this.ultimoBackupEm,
+      notificacaoPedida: this.notificacaoPedida,
     };
   }
 
@@ -48,6 +50,7 @@ export class Preferencias extends BaseModel {
       atalhos_painel: atalhosParaTexto(this.atalhos),
       lembrete_backup_dias: this.lembreteBackupDias,
       ultimo_backup_em: this.ultimoBackupEm,
+      notificacao_pedida: this.notificacaoPedida ? 1 : 0,
     };
   }
 
@@ -63,6 +66,7 @@ export class Preferencias extends BaseModel {
         atalhos: atalhosDeTexto(String(r.atalhos_painel ?? '')),
         lembreteBackupDias: r.lembrete_backup_dias,
         ultimoBackupEm: r.ultimo_backup_em,
+        notificacaoPedida: r.notificacao_pedida === 1,
       },
       BaseModel.baseDeLinha(r),
     );
