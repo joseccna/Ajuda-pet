@@ -158,6 +158,7 @@ function dataComHora(dataISO, hhmm) {
 /**
  * Decide quais notificações agendar. Para cada evento pendente (não atrasado, não passado):
  * - um aviso no dia (na hora do evento menos 1 hora, ou no horário padrão se não tiver hora);
+ *   se essa 1 hora antes já passou, o aviso vai para a hora do evento;
  * - um aviso de antecedência (por padrão 3 dias antes, no horário padrão), se maior que zero.
  * Só entra o que ainda está no futuro. O sistema limita o total (64 no iOS), então é cortado em 60.
  */
@@ -170,9 +171,11 @@ export function planejarNotificacoes(eventos, agora, config = {}) {
   for (const e of eventos) {
     if (e.estado === 'atrasado' || e.estado === 'passado') continue;
 
-    const quandoDia = e.hora
+    let quandoDia = e.hora
       ? new Date(dataComHora(e.data, e.hora).getTime() - MINUTOS_ANTES_DO_EVENTO * 60000)
       : dataComHora(e.data, horaPadrao);
+    // Lembrete criado em cima da hora (a 1 hora antes já passou): avisa na hora do evento.
+    if (e.hora && quandoDia <= agora) quandoDia = dataComHora(e.data, e.hora);
     if (quandoDia > agora) {
       itens.push({
         chave: `${e.chave}|${e.data}|dia`,

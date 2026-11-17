@@ -99,6 +99,21 @@ describe('alimentação: refeições do dia', () => {
     const cedo = new Date(2026, 9, 2, 6, 0);
     expect(refeicoesParaLembrar(refeicoesDoDia(plano, [], cedo), cedo)).toEqual([]);
   });
+  it('no dia em que o plano foi criado, não cobra as refeições de antes da criação', () => {
+    const noite = new Date(2026, 9, 2, 21, 4);
+    const criado = { ...plano, criadoEm: new Date(2026, 9, 2, 21, 0).toISOString() };
+    const r = refeicoesDoDia(criado, [], noite);
+    expect(r.map((x) => x.antesDoPlano)).toEqual([true, true, true]);
+    expect(refeicoesParaLembrar(r, noite)).toEqual([]);
+    // No dia seguinte, tudo volta a contar.
+    const amanha = new Date(2026, 9, 3, 18, 15);
+    expect(
+      refeicoesParaLembrar(refeicoesDoDia(criado, [], amanha), amanha).map((x) => x.horario),
+    ).toEqual(['08:00', '13:00', '19:00']);
+    // Criado ao meio-dia: só o café da manhã fica de fora.
+    const meioDia = { ...plano, criadoEm: new Date(2026, 9, 2, 12, 0).toISOString() };
+    expect(refeicoesDoDia(meioDia, [], agora).map((x) => x.antesDoPlano)).toEqual([true, false, false]);
+  });
   it('perto da meia-noite não passa de 23:59', () => {
     const tarde = new Date(2026, 9, 2, 23, 30);
     expect(refeicoesParaLembrar(refeicoesDoDia({ horarios: ['23:45'] }, [], tarde), tarde)).toHaveLength(1);

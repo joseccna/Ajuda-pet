@@ -160,6 +160,13 @@ describe('planejarNotificacoes', () => {
     ];
     expect(planejarNotificacoes(lista, agora).map((p) => p.chave)).toEqual(['hoje-tarde|2026-10-02|dia']);
   });
+  it('lembrete criado em cima da hora avisa na hora do evento', () => {
+    // agora 12:00; evento 12:30: a 1 hora antes (11:30) já passou
+    const plano = planejarNotificacoes([ev('em-cima', '2026-10-02', { hora: '12:30' })], agora);
+    expect(plano.map((p) => [p.chave, p.quando.getTime(), p.corpo])).toEqual([
+      ['em-cima|2026-10-02|dia', new Date(2026, 9, 2, 12, 30).getTime(), 'Hoje às 12:30'],
+    ]);
+  });
   it('um aviso 1 hora antes de um evento à 00:30 cai na noite anterior', () => {
     const plano = planejarNotificacoes(
       [ev('madrugada', '2026-10-05', { hora: '00:30', antecedenciaDias: 0 })],

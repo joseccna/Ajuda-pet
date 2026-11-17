@@ -1,4 +1,4 @@
-import { diferencaEmDias } from '../utils/datas';
+import { diferencaEmDias, paraISO } from '../utils/datas';
 
 /** Plano alimentar: horários das refeições, ração por dia e estoque. Funções puras. */
 
@@ -65,9 +65,18 @@ export function textoEstoque(plano, hojeISO) {
  */
 export function refeicoesDoDia(plano, registros, agora) {
   const hora = horaDoDia(agora);
+  // No dia em que o plano foi criado, os horários anteriores à criação não contam (o plano ainda não existia).
+  const criado = plano.criadoEm ? new Date(plano.criadoEm) : null;
+  const horaCriacao = criado && paraISO(criado) === paraISO(agora) ? horaDoDia(criado) : null;
   return plano.horarios.map((horario) => {
     const registro = registros.find((r) => r.horario === horario) ?? null;
-    return { horario, feita: registro !== null, registro, passou: horario < hora };
+    return {
+      horario,
+      feita: registro !== null,
+      registro,
+      passou: horario < hora,
+      antesDoPlano: horaCriacao !== null && horario < horaCriacao,
+    };
   });
 }
 
@@ -78,5 +87,5 @@ export function refeicoesParaLembrar(refeicoes, agora) {
   const limite = horaDoDia(
     new Date(Math.min(agora.getTime() + MINUTOS_ANTES_LEMBRETE * 60000, fimDoDia.getTime())),
   );
-  return refeicoes.filter((r) => !r.feita && r.horario <= limite);
+  return refeicoes.filter((r) => !r.feita && !r.antesDoPlano && r.horario <= limite);
 }

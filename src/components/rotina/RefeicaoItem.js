@@ -7,14 +7,16 @@ import { Texto } from '../ui/Texto';
 /** Uma refeição do dia. Toque para marcar como feita ou desmarcar. */
 export function RefeicaoItem({ refeicao, feitaPorVoce, aoAlternar }) {
   const { paleta } = useTheme();
-  const { horario, feita, passou } = refeicao;
+  const { horario, feita, passou, antesDoPlano } = refeicao;
   const estado = feita
     ? feitaPorVoce
       ? 'Feita por você'
       : 'Feita por outra pessoa'
-    : passou
-      ? 'Ainda não marcada'
-      : 'Pendente';
+    : antesDoPlano
+      ? 'Começa amanhã'
+      : passou
+        ? 'Ainda não marcada'
+        : 'Pendente';
 
   return (
     <Pressable
