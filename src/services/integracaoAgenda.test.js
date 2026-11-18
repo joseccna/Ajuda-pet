@@ -224,7 +224,8 @@ suite('integração da agenda e das notificações', () => {
       setNotificationHandler: jest.fn(),
       setNotificationChannelAsync: jest.fn(async () => {}),
       addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-      AndroidImportance: { DEFAULT: 3 },
+      deleteNotificationChannelAsync: jest.fn(async () => {}),
+      AndroidImportance: { DEFAULT: 3, HIGH: 4 },
       SchedulableTriggerInputTypes: { DATE: 'date' },
     });
 
@@ -240,7 +241,7 @@ suite('integração da agenda e das notificações', () => {
       const chamadas = nativo.scheduleNotificationAsync.mock.calls.map(([c]) => c);
       for (const c of chamadas) {
         expect(c.trigger.type).toBe('date');
-        expect(c.trigger.channelId).toBe('lembretes');
+        expect(c.trigger.channelId).toBe('avisos');
         expect(c.trigger.date.getTime()).toBeGreaterThan(HOJE.getTime());
       }
       const titulos = chamadas.map((c) => c.content.title);
@@ -310,10 +311,12 @@ suite('integração da agenda e das notificações', () => {
       const nativo = nativoFalso();
       await new NotificacaoService(agenda, nativo).configurar();
       expect(nativo.setNotificationHandler).toHaveBeenCalledTimes(1);
-      expect(nativo.setNotificationChannelAsync).toHaveBeenCalledWith('lembretes', {
+      // Importância alta: aparece por cima da tela mesmo com outro app aberto.
+      expect(nativo.setNotificationChannelAsync).toHaveBeenCalledWith('avisos', {
         name: 'Lembretes',
-        importance: 3,
+        importance: 4,
       });
+      expect(nativo.deleteNotificationChannelAsync).toHaveBeenCalledWith('lembretes');
     });
 
     it('ao tocar numa notificação, entrega a rota', () => {

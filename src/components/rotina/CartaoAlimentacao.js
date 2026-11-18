@@ -67,13 +67,6 @@ export function CartaoAlimentacao({ pet, irPara }) {
         />
       ))}
 
-      <Button
-        titulo="Ver histórico de refeições"
-        variante="texto"
-        larguraTotal={false}
-        aoPressionar={() => irPara('/pet/[id]/refeicoes')}
-      />
-
       {estoque ? (
         <View style={styles.estoque}>
           <Ionicons name="cube-outline" size={18} color={paleta.textoSuave} />
@@ -82,6 +75,21 @@ export function CartaoAlimentacao({ pet, irPara }) {
           </Texto>
         </View>
       ) : null}
+
+      <View style={styles.acoes}>
+        <Button
+          titulo="Novo plano"
+          icone="add"
+          variante="secundario"
+          aoPressionar={() => irPara('/pet/[id]/plano', { modo: 'novo' })}
+        />
+        <Button
+          titulo="Ver histórico de refeições"
+          variante="texto"
+          larguraTotal={false}
+          aoPressionar={() => irPara('/pet/[id]/refeicoes')}
+        />
+      </View>
     </Card>
   );
 }
@@ -89,4 +97,5 @@ export function CartaoAlimentacao({ pet, irPara }) {
 const styles = StyleSheet.create({
   topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   estoque: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm, marginTop: espaco.sm },
+  acoes: { gap: espaco.sm, marginTop: espaco.md, alignItems: 'center' },
 });

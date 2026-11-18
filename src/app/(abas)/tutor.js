@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { Texto } from '../../components/ui/Texto';
 import { useTutor } from '../../hooks/useTutor';
 import { iniciais } from '../../models/regrasTutor';
 import { ALVO_MINIMO, espaco, fontes, raio, useTheme } from '../../theme';
+import { textoVersao } from '../../utils/versao';
 
 function Contato({ icone, titulo, valor, aoPressionar }) {
   const { paleta } = useTheme();
@@ -40,6 +41,7 @@ export default function AbaTutor() {
   const { paleta } = useTheme();
   const { tutor } = useTutor();
   const editar = () => router.push('/tutor-perfil');
+  const versao = useMemo(() => textoVersao(), []);
 
   return (
     <Screen bordas={['top', 'left', 'right']}>
@@ -110,6 +112,11 @@ export default function AbaTutor() {
           aoPressionar={() => router.push('/preferencias')}
         />
       </View>
+      {versao ? (
+        <Texto variante="legenda" style={{ textAlign: 'center', marginTop: espaco.lg }}>
+          Ajuda Pet, versão {versao}
+        </Texto>
+      ) : null}
     </Screen>
   );
 }

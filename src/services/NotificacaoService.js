@@ -4,7 +4,13 @@ import { agendaService } from './AgendaService';
 import { alimentacaoService } from './AlimentacaoService';
 import { preferenciasService } from './PreferenciasService';
 
-const CANAL = 'lembretes';
+/**
+ * Canal com importância alta: o aviso aparece por cima da tela mesmo com outro app aberto.
+ * O Android não deixa mudar a importância de um canal que já existe, por isso o nome novo;
+ * o canal antigo ("lembretes", de importância padrão) é apagado.
+ */
+const CANAL = 'avisos';
+const CANAL_ANTIGO = 'lembretes';
 
 /** "android", "ios"... Lido só quando precisa, para o arquivo poder ser testado fora do celular. */
 function plataforma() {
@@ -70,8 +76,13 @@ export class NotificacaoService {
       if (plataforma() === 'android') {
         await N.setNotificationChannelAsync(CANAL, {
           name: 'Lembretes',
-          importance: N.AndroidImportance.DEFAULT,
+          importance: N.AndroidImportance.HIGH,
         });
+        try {
+          await N.deleteNotificationChannelAsync(CANAL_ANTIGO);
+        } catch {
+          // já não existia
+        }
       }
     } catch {
       // Sem notificações neste ambiente: o app continua funcionando.

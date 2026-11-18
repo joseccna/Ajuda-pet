@@ -12,23 +12,18 @@ import { ALVO_MINIMO, espaco, raio, useTheme } from '../../theme';
 import { formatarDataBR, lerDataBR, mascararDataBR, paraISO } from '../../utils/datas';
 import { Button } from '../ui/Button';
 import { Campo } from '../ui/Campo';
-import { ChipSelector } from '../ui/ChipSelector';
 import { SecaoRecolhivel } from '../ui/SecaoRecolhivel';
 import { Texto } from '../ui/Texto';
 
-const MODOS = [
-  { valor: 'corrigir', rotulo: 'Corrigir este plano' },
-  { valor: 'novo', rotulo: 'Novo plano' },
-];
-
 /**
  * Plano alimentar: ração, quantidade por refeição, horários, lembretes e estoque.
- * Ao editar, escolha entre corrigir o plano atual (um erro de digitação) ou criar um novo,
- * que guarda o anterior no histórico (troca de ração ou de quantidade).
+ * Com um plano em vigor, o modo vem de quem abriu a tela: "corrigir" (Editar plano, muda o atual)
+ * ou "novo" (Novo plano, guarda o atual no histórico e começa outro a partir dos mesmos dados).
  */
-export function FormPlano({ pet, plano, aoSalvar }) {
+export function FormPlano({ pet, plano, modo = 'corrigir', aoSalvar }) {
   const { paleta } = useTheme();
   const editando = Boolean(plano);
+  const trocando = editando && modo === 'novo';
 
   const inicial = useMemo(
     () => ({
@@ -40,7 +35,6 @@ export function FormPlano({ pet, plano, aoSalvar }) {
       saco: plano?.sacoG ? String(plano.sacoG / 1000).replace('.', ',') : '',
       aberto: plano?.sacoAbertoEm ? formatarDataBR(plano.sacoAbertoEm) : '',
       observacoes: plano?.observacoes ?? '',
-      modo: 'corrigir',
     }),
     [plano],
   );
@@ -104,7 +98,7 @@ export function FormPlano({ pet, plano, aoSalvar }) {
     };
 
     try {
-      if (editando && e.modo === 'corrigir') {
+      if (editando && !trocando) {
         Object.assign(plano, dados, { horarios: normalizarHorarios(dados.horarios) });
         alimentacaoService.corrigirPlano(plano);
       } else {
@@ -121,12 +115,15 @@ export function FormPlano({ pet, plano, aoSalvar }) {
 
   return (
     <View>
-      {editando ? (
-        <ChipSelector rotulo="Ao salvar" valor={e.modo} aoMudar={(v) => mudar('modo', v)} opcoes={MODOS} />
-      ) : null}
-      {editando && e.modo === 'novo' ? (
-        <Texto variante="legenda" style={{ marginTop: -8, marginBottom: 16 }}>
-          O plano atual vai para o histórico, encerrado ontem, e este começa hoje.
+      {trocando ? (
+        <Texto variante="legenda" style={{ marginBottom: 16 }}>
+          Já vem com os dados do plano atual: mude o que for diferente. Ao criar, o plano atual vai para o
+          histórico e este começa hoje.
+        </Texto>
+      ) : editando ? (
+        <Texto variante="legenda" style={{ marginBottom: 16 }}>
+          Para corrigir o plano atual. Trocou de ração ou de quantidade? Use “Novo plano” no cartão de
+          Alimentação, que guarda o plano atual no histórico.
         </Texto>
       ) : null}
 
@@ -243,7 +240,7 @@ export function FormPlano({ pet, plano, aoSalvar }) {
         onChangeText={(t) => mudar('observacoes', t)}
       />
 
-      <Button titulo={editando ? 'Salvar plano' : 'Criar plano'} aoPressionar={salvar} />
+      <Button titulo={editando && !trocando ? 'Salvar plano' : 'Criar plano'} aoPressionar={salvar} />
     </View>
   );
 }
