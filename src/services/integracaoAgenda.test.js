@@ -257,6 +257,30 @@ suite('integração da agenda e das notificações', () => {
       expect(checkup.content.data.rota.pathname).toBe('/pet/[id]/consulta');
     });
 
+    it('agenda os mais próximos primeiro, com as refeições, e um erro não derruba os outros', async () => {
+      const nativo = nativoFalso();
+      let chamada = 0;
+      nativo.scheduleNotificationAsync = jest.fn(async () => {
+        chamada += 1;
+        if (chamada === 1) throw new Error('falhou');
+        return 'id';
+      });
+      const em = (h, m) => new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate(), h, m);
+      const alimentacao = {
+        avisos: () => [
+          { titulo: 'Refeição', corpo: 'depois', quando: em(23, 30), rota: null },
+          { titulo: 'Refeição', corpo: 'na hora', quando: em(22, 30), rota: null },
+        ],
+      };
+      const servico = new NotificacaoService(agenda, nativo, undefined, alimentacao);
+      const { agendadas } = await servico.reagendar(em(22, 0));
+
+      const quandos = nativo.scheduleNotificationAsync.mock.calls.map(([c]) => c.trigger.date.getTime());
+      expect(quandos).toEqual([...quandos].sort((a, b) => a - b));
+      expect(quandos[0]).toBe(em(22, 30).getTime()); // a refeição mais próxima vem antes da agenda
+      expect(agendadas).toBe(quandos.length - 1); // a primeira falhou, as outras seguiram
+    });
+
     it('sem permissão, não agenda nada e limpa o que havia', async () => {
       const nativo = nativoFalso({ granted: false });
       const { agendadas } = await new NotificacaoService(agenda, nativo).reagendar(HOJE);

@@ -139,24 +139,12 @@ export class NotificacaoService {
         horaPadrao: prefs.horarioPadrao,
         antecedenciaDias: prefs.antecedenciaDias,
       });
-      for (const item of plano) {
-        await N.scheduleNotificationAsync({
-          content: { title: item.titulo, body: item.corpo, data: { rota: item.rota } },
-          trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: item.quando, channelId: CANAL },
-        });
-      }
       const backup = planejarLembreteBackup(
         prefs.ultimoBackupEm,
         prefs.lembreteBackupDias,
         agora,
         prefs.horarioPadrao,
       );
-      if (backup) {
-        await N.scheduleNotificationAsync({
-          content: { title: backup.titulo, body: backup.corpo, data: { rota: backup.rota } },
-          trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: backup.quando, channelId: CANAL },
-        });
-      }
       // Refeições: na hora e, se não for marcada, 1 hora depois.
       let refeicoes = [];
       try {
@@ -164,13 +152,27 @@ export class NotificacaoService {
       } catch {
         refeicoes = [];
       }
-      for (const item of refeicoes) {
-        await N.scheduleNotificationAsync({
-          content: { title: item.titulo, body: item.corpo, data: { rota: item.rota } },
-          trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: item.quando, channelId: CANAL },
-        });
+      // Os mais próximos primeiro: se o sistema congelar o app no meio (alguns celulares fazem isso
+      // logo que ele sai da tela), os avisos que chegam antes já estão agendados.
+      const todos = [...plano, ...(backup ? [backup] : []), ...refeicoes].sort(
+        (a, b) => a.quando - b.quando,
+      );
+      let agendadas = 0;
+      const comecou = Date.now();
+      for (const item of todos) {
+        // Pula o que venceu enquanto agendava (o tempo corrido conta a partir de "agora").
+        if (item.quando.getTime() <= agora.getTime() + (Date.now() - comecou)) continue;
+        try {
+          await N.scheduleNotificationAsync({
+            content: { title: item.titulo, body: item.corpo, data: { rota: item.rota } },
+            trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: item.quando, channelId: CANAL },
+          });
+          agendadas += 1;
+        } catch {
+          // Um aviso com problema não impede os outros.
+        }
       }
-      return { agendadas: plano.length + (backup ? 1 : 0) + refeicoes.length };
+      return { agendadas };
     } catch {
       return { agendadas: 0 };
     } finally {

@@ -80,6 +80,51 @@ export function refeicoesDoDia(plano, registros, agora) {
   });
 }
 
+/** Quantos dias o histórico de refeições mostra. */
+export const DIAS_HISTORICO_REFEICOES = 30;
+
+/**
+ * Histórico de refeições, do dia mais recente para o mais antigo. Para cada dia, o plano que valia
+ * naquele dia e cada horário: feita, nao-marcada (o horário passou e ninguém marcou) ou pendente
+ * (hoje, ainda vai acontecer). Dias sem plano ficam de fora, e no dia em que o plano foi criado
+ * os horários de antes da criação também.
+ * planos: todos os planos do pet (com inicio, fim, criadoEm); registros: marcações do período.
+ */
+export function historicoRefeicoes(planos, registros, agora, dias = DIAS_HISTORICO_REFEICOES) {
+  const hojeISO = paraISO(agora);
+  const horaAgora = horaDoDia(agora);
+  const resultado = [];
+  for (let d = 0; d < dias; d++) {
+    const dataISO = paraISO(new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() - d, 12, 0, 0));
+    const plano = planos
+      .filter((p) => p.inicio <= dataISO && (!p.fim || dataISO <= p.fim))
+      .sort((a, b) => b.inicio.localeCompare(a.inicio) || String(b.criadoEm).localeCompare(String(a.criadoEm)))[0];
+    if (!plano) continue;
+    const criado = plano.criadoEm ? new Date(plano.criadoEm) : null;
+    const horaCriacao = criado && paraISO(criado) === dataISO ? horaDoDia(criado) : null;
+    const refeicoes = [];
+    for (const horario of plano.horarios) {
+      if (horaCriacao !== null && horario < horaCriacao) continue;
+      const registro =
+        registros.find((r) => r.data === dataISO && r.planoId === plano.id && r.horario === horario) ?? null;
+      const situacao = registro
+        ? 'feita'
+        : dataISO === hojeISO && horario >= horaAgora
+          ? 'pendente'
+          : 'nao-marcada';
+      refeicoes.push({ horario, situacao, registro });
+    }
+    if (refeicoes.length === 0) continue;
+    resultado.push({
+      data: dataISO,
+      refeicoes,
+      feitas: refeicoes.filter((r) => r.situacao === 'feita').length,
+      naoMarcadas: refeicoes.filter((r) => r.situacao === 'nao-marcada').length,
+    });
+  }
+  return resultado;
+}
+
 /** Dias à frente com avisos de refeição agendados (o app reagenda ao abrir e ao marcar). */
 export const DIAS_AVISOS_REFEICAO = 7;
 /** Quantos minutos depois do horário vem o segundo aviso, se a refeição não foi marcada. */

@@ -67,6 +67,13 @@ export function CartaoAlimentacao({ pet, irPara }) {
         />
       ))}
 
+      <Button
+        titulo="Ver histórico de refeições"
+        variante="texto"
+        larguraTotal={false}
+        aoPressionar={() => irPara('/pet/[id]/refeicoes')}
+      />
+
       {estoque ? (
         <View style={styles.estoque}>
           <Ionicons name="cube-outline" size={18} color={paleta.textoSuave} />

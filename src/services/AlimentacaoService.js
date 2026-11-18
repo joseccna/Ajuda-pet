@@ -5,6 +5,8 @@ import { RefeicaoRegistroRepository } from '../database/repositories/RefeicaoReg
 import { criarLembrete } from '../models/Lembrete';
 import { RefeicaoRegistro } from '../models/RefeicaoRegistro';
 import {
+  DIAS_HISTORICO_REFEICOES,
+  historicoRefeicoes,
   planejarAvisosRefeicao,
   refeicoesDoDia,
   refeicoesParaLembrar,
@@ -95,6 +97,14 @@ export class AlimentacaoService {
       new RefeicaoRegistro({ planoId: plano.id, petId: plano.petId, data: dataISO, horario }),
     );
     return true;
+  }
+
+  /** Histórico de refeições dos últimos 30 dias: feitas e não marcadas, dia a dia. */
+  historicoRefeicoes(petId, agora = new Date(), dias = DIAS_HISTORICO_REFEICOES) {
+    const fimISO = paraISO(agora);
+    const inicioISO = somarDias(fimISO, -(dias - 1));
+    const registros = this.refeicoes.doPeriodo(petId, inicioISO, fimISO);
+    return historicoRefeicoes(this.planos.historico(petId), registros, agora, dias);
   }
 
   /** Notificações das refeições dos próximos dias (planos com lembretes ligados, de pets ativos). */

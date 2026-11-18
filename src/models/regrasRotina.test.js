@@ -9,6 +9,7 @@ import {
   refeicoesDoDia,
   refeicoesParaLembrar,
   planejarAvisosRefeicao,
+  historicoRefeicoes,
   textoEstoque,
 } from './regrasAlimentacao';
 import {
@@ -139,6 +140,29 @@ describe('alimentação: refeições do dia', () => {
     const p = { id: 'p1', inicio: '2026-09-01', horarios: ['14:00'] };
     const itens = planejarAvisosRefeicao([{ plano: p, deNome: 'do Thor', marcadasHoje: [] }], agora, 1);
     expect(itens.map((i) => i.corpo)).toEqual(['A refeição das 14:00 ainda não foi marcada']);
+  });
+  it('histórico: feitas, não marcadas e pendentes, com o plano de cada dia', () => {
+    // agora: 02/10 14:30. Plano antigo até 30/09 (08:00); plano novo desde 01/10, criado às 10:00 (08:00 e 19:00).
+    const antigo = { id: 'a', inicio: '2026-09-29', fim: '2026-09-30', horarios: ['08:00'], criadoEm: null };
+    const novo = {
+      id: 'n',
+      inicio: '2026-10-01',
+      fim: null,
+      horarios: ['08:00', '19:00'],
+      criadoEm: new Date(2026, 9, 1, 10, 0).toISOString(),
+    };
+    const registros = [
+      { data: '2026-10-02', planoId: 'n', horario: '08:00' },
+      { data: '2026-09-29', planoId: 'a', horario: '08:00' },
+    ];
+    const h = historicoRefeicoes([novo, antigo], registros, agora, 5);
+    expect(h.map((d) => [d.data, d.refeicoes.map((r) => `${r.horario} ${r.situacao}`)])).toEqual([
+      ['2026-10-02', ['08:00 feita', '19:00 pendente']],
+      ['2026-10-01', ['19:00 nao-marcada']], // 08:00 foi antes da criação do plano
+      ['2026-09-30', ['08:00 nao-marcada']],
+      ['2026-09-29', ['08:00 feita']],
+    ]); // 28/09: sem plano, fica de fora
+    expect([h[1].feitas, h[1].naoMarcadas]).toEqual([0, 1]);
   });
   it('perto da meia-noite não passa de 23:59', () => {
     const tarde = new Date(2026, 9, 2, 23, 30);

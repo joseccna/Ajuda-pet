@@ -19,6 +19,17 @@ export class RefeicaoRegistroRepository extends BaseRepository {
       .map((l) => RefeicaoRegistro.fromRow(l));
   }
 
+  /** Marcações do pet entre duas datas (inclusive), para o histórico. */
+  doPeriodo(petId, inicioISO, fimISO) {
+    return this.db
+      .getAllSync(
+        `SELECT * FROM refeicoes_registro WHERE pet_id = ? AND data >= ? AND data <= ? AND excluido_em IS NULL
+         ORDER BY data, criado_em`,
+        [petId, inicioISO, fimISO],
+      )
+      .map((l) => RefeicaoRegistro.fromRow(l));
+  }
+
   /** Marcações de um dia para todos os pets (para os lembretes). */
   doDiaDeTodos(dataISO) {
     return this.db

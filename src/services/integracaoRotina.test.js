@@ -110,6 +110,15 @@ suite('integração da rotina com o SQLite', () => {
       expect(alimentacao.lembretes(em(6, 0))).toEqual([]);
     });
 
+    it('histórico de refeições lê as marcações do banco', () => {
+      const h = alimentacao.historicoRefeicoes(luna.id, em(18, 15), 3);
+      const hoje = h.find((d) => d.data === '2026-10-02');
+      expect(hoje.refeicoes.map((r) => [r.horario, r.situacao])).toEqual([
+        ['08:00', 'feita'],
+        ['19:00', 'pendente'],
+      ]);
+    });
+
     it('agenda avisos das refeições não marcadas', () => {
       // 08:00 já marcada no teste anterior; às 18:15 restam os dois avisos das 19:00 de hoje
       const hoje = alimentacao.avisos(em(18, 15)).filter((a) => a.quando.getDate() === 2);
