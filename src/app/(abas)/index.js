@@ -3,12 +3,14 @@ import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AvisoBackup } from '../../components/backup/AvisoBackup';
 import { AtalhoTile } from '../../components/painel/AtalhoTile';
+import { AvisoNotificacoes } from '../../components/painel/AvisoNotificacoes';
 import { LembreteCard } from '../../components/painel/LembreteCard';
 import { PetAvatarRow } from '../../components/painel/PetAvatarRow';
 import { Button } from '../../components/ui/Button';
 import { EstadoVazio } from '../../components/ui/EstadoVazio';
 import { Screen } from '../../components/ui/Screen';
 import { Texto } from '../../components/ui/Texto';
+import { useProblemaDosAvisos } from '../../hooks/useAgenda';
 import { useSituacaoBackup } from '../../hooks/useBackup';
 import { usePainel } from '../../hooks/usePainel';
 import { usePets } from '../../hooks/usePets';
@@ -45,6 +47,7 @@ export default function Painel() {
   const { tutor } = useTutor();
   const { atalhos } = usePreferencias();
   const situacaoBackup = useSituacaoBackup();
+  const avisos = useProblemaDosAvisos();
   const [verTodosHoje, setVerTodosHoje] = useState(false);
   const [verTodosAtalhos, setVerTodosAtalhos] = useState(false);
 
@@ -95,6 +98,7 @@ export default function Painel() {
         )
       ) : (
         <>
+          <AvisoNotificacoes problema={avisos.problema} aoResolver={avisos.resolver} />
           {situacaoBackup.devido ? (
             <AvisoBackup situacao={situacaoBackup} compacto aoFazer={() => router.push('/backup')} />
           ) : null}

@@ -144,6 +144,37 @@ export class NotificacaoService {
     }
   }
 
+  /**
+   * O que impede os avisos de chegarem na hora: 'notificacoes' (desligadas), 'bateria'
+   * (app na economia de bateria) ou null (tudo certo, ou não dá para saber neste aparelho).
+   */
+  async problemaDosAvisos() {
+    const avisos = await this.estado();
+    if (!avisos.disponivel) return null;
+    if (!avisos.permitido) return 'notificacoes';
+    return (await this.bateriaLiberada()) === false ? 'bateria' : null;
+  }
+
+  /**
+   * Resolve o que der com as janelas do Android: pede a permissão de notificação (ou devolve
+   * 'configuracoes' se o Android não deixa mais perguntar) e, com ela, a liberação da bateria.
+   * Devolve o problema que sobrou, ou 'configuracoes'.
+   */
+  async resolverAvisos() {
+    let avisos = await this.estado();
+    if (avisos.disponivel && !avisos.permitido) {
+      if (!avisos.podePedir) return 'configuracoes';
+      avisos = await this.pedirPermissao();
+      if (!avisos.permitido) return 'notificacoes';
+      this.reagendarEmBreve();
+    }
+    if ((await this.bateriaLiberada()) === false) {
+      await this.pedirLiberarBateria();
+      this.preferencias.salvar({ bateriaPedida: true });
+    }
+    return this.problemaDosAvisos();
+  }
+
   /** Define como a notificação aparece com o app aberto e cria o canal do Android. */
   async configurar() {
     const N = this.nativo;

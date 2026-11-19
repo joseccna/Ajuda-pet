@@ -250,6 +250,40 @@ suite('preferências com o SQLite', () => {
       expect(preferenciasService.obter().bateriaPedida).toBe(false);
     });
 
+    it('o painel aponta o que impede os avisos e resolve com as janelas do Android', async () => {
+      let permitido = false;
+      let ligada = true;
+      const nativo = {
+        getPermissionsAsync: jest.fn(async () => ({ granted: permitido, canAskAgain: true })),
+        requestPermissionsAsync: jest.fn(async () => {
+          permitido = true;
+        }),
+      };
+      const bateria = {
+        otimizacaoLigada: jest.fn(async () => ligada),
+        pedirLiberacao: jest.fn(async () => {
+          ligada = false;
+        }),
+      };
+      const servico = new NotificacaoService({ proximos: () => [] }, nativo, undefined, undefined, bateria);
+      servico.reagendarEmBreve = jest.fn();
+
+      expect(await servico.problemaDosAvisos()).toBe('notificacoes');
+      // Um toque: pede a notificação e, com ela, a bateria.
+      expect(await servico.resolverAvisos()).toBeNull();
+      expect(nativo.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+      expect(bateria.pedirLiberacao).toHaveBeenCalledTimes(1);
+
+      ligada = true;
+      expect(await servico.problemaDosAvisos()).toBe('bateria');
+
+      // O Android não deixa mais perguntar: manda para as configurações.
+      permitido = false;
+      nativo.getPermissionsAsync.mockImplementation(async () => ({ granted: false, canAskAgain: false }));
+      expect(await servico.resolverAvisos()).toBe('configuracoes');
+      preferenciasService.salvar({ bateriaPedida: false });
+    });
+
     it('a unidade de peso vale no cartão de emergência', () => {
       const emergencia = new EmergenciaService();
       new TutorService().salvar(new Tutor({ nome: 'Ana' }));
