@@ -22,7 +22,7 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Trabalho no branch `desenvolvimento`. Levar ao `main` (e criar etiquetas de versão) **só com OK
   do usuário**.
-- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (351 testes em 2026-11-19).
+- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (352 testes em 2026-11-19).
 - Migrações do banco (`src/database/migracoes.js`): só acrescentar no fim. A última é a 13.
 - Versão: `version` do `app.json` em MAIOR.MENOR.CORREÇÃO, subir a cada entrega. O número da
   compilação (versionCode) fica na nuvem do EAS (`appVersionSource: remote`, `autoIncrement` no
@@ -47,8 +47,9 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Versão 1.1.0 aprovada no celular (versão no app, sem microfone, botão "Novo plano", avisos
   por cima de outros apps, aviso de 1 h depois).
-- Versão 1.1.1 (commit ccb56e5) com o pedido de liberar da economia de bateria: build EAS
-  41bbae22, **aguardando o teste do usuário**. Dúvida principal: o "Permitir" da janela do
+- Versão 1.1.1 com o pedido de liberar da economia de bateria (ccb56e5) e a faixa no painel
+  quando as notificações estão desligadas ou o app está na economia de bateria (c0b1110):
+  build EAS 3453d4ad (compilação 4), **aguardando o teste do usuário**. Dúvida principal: o "Permitir" da janela do
   Android muda a tela Energia da vivo para "Nenhuma restrição"?
 - `main` parado em 5c99e7d. Depois da aprovação, com OK do usuário: levar o `desenvolvimento`
   ao `main` (`git merge --ff-only`) e criar as etiquetas `v1.1.0` e `v1.1.1`.
