@@ -386,4 +386,8 @@ export const MIGRACOES = [
   `
   ALTER TABLE configuracao_app ADD COLUMN notificacao_pedida INTEGER NOT NULL DEFAULT 0;
   `,
+  // 13: o app já pediu para ficar fora da economia de bateria (avisos na hora)?
+  `
+  ALTER TABLE configuracao_app ADD COLUMN bateria_pedida INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

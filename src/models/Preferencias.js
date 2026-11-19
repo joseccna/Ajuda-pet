@@ -21,6 +21,7 @@ export class Preferencias extends BaseModel {
     this.lembreteBackupDias = v.lembreteBackupDias;
     this.ultimoBackupEm = v.ultimoBackupEm;
     this.notificacaoPedida = v.notificacaoPedida;
+    this.bateriaPedida = v.bateriaPedida;
   }
 
   /** Os valores como objeto simples, para usar nas telas e nos serviços. */
@@ -36,6 +37,7 @@ export class Preferencias extends BaseModel {
       lembreteBackupDias: this.lembreteBackupDias,
       ultimoBackupEm: this.ultimoBackupEm,
       notificacaoPedida: this.notificacaoPedida,
+      bateriaPedida: this.bateriaPedida,
     };
   }
 
@@ -51,6 +53,7 @@ export class Preferencias extends BaseModel {
       lembrete_backup_dias: this.lembreteBackupDias,
       ultimo_backup_em: this.ultimoBackupEm,
       notificacao_pedida: this.notificacaoPedida ? 1 : 0,
+      bateria_pedida: this.bateriaPedida ? 1 : 0,
     };
   }
 
@@ -67,6 +70,7 @@ export class Preferencias extends BaseModel {
         lembreteBackupDias: r.lembrete_backup_dias,
         ultimoBackupEm: r.ultimo_backup_em,
         notificacaoPedida: r.notificacao_pedida === 1,
+        bateriaPedida: r.bateria_pedida === 1,
       },
       BaseModel.baseDeLinha(r),
     );

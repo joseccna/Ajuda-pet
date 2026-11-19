@@ -205,6 +205,51 @@ suite('preferências com o SQLite', () => {
       expect(nativo.requestPermissionsAsync).toHaveBeenCalledTimes(1);
     });
 
+    it('pede para liberar da economia de bateria uma vez só, e só com avisos ligados', async () => {
+      const nativo = { getPermissionsAsync: jest.fn(async () => ({ granted: true, canAskAgain: true })) };
+      let ligada = true;
+      const bateria = {
+        otimizacaoLigada: jest.fn(async () => ligada),
+        pedirLiberacao: jest.fn(async () => {
+          ligada = false;
+        }),
+      };
+      const servico = new NotificacaoService({ proximos: () => [] }, nativo, undefined, undefined, bateria);
+      expect(preferenciasService.obter().bateriaPedida).toBe(false);
+      expect(await servico.bateriaLiberada()).toBe(false);
+
+      await servico.pedirBateriaNaPrimeiraVez();
+      expect(bateria.pedirLiberacao).toHaveBeenCalledTimes(1);
+      expect(await servico.bateriaLiberada()).toBe(true);
+      expect(preferenciasService.obter().bateriaPedida).toBe(true);
+
+      // Voltou para a economia: na abertura não pede de novo (o botão fica em Preferências).
+      ligada = true;
+      await servico.pedirBateriaNaPrimeiraVez();
+      expect(bateria.pedirLiberacao).toHaveBeenCalledTimes(1);
+      preferenciasService.salvar({ bateriaPedida: false });
+    });
+
+    it('não pede a bateria sem permissão de notificação nem onde não dá para saber', async () => {
+      const bateria = { otimizacaoLigada: jest.fn(async () => true), pedirLiberacao: jest.fn() };
+      const semAvisos = { getPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })) };
+      await new NotificacaoService(
+        { proximos: () => [] },
+        semAvisos,
+        undefined,
+        undefined,
+        bateria,
+      ).pedirBateriaNaPrimeiraVez();
+      expect(bateria.pedirLiberacao).not.toHaveBeenCalled();
+      expect(preferenciasService.obter().bateriaPedida).toBe(false);
+
+      const comAvisos = { getPermissionsAsync: jest.fn(async () => ({ granted: true, canAskAgain: true })) };
+      const servico = new NotificacaoService({ proximos: () => [] }, comAvisos, undefined, undefined, null);
+      expect(await servico.bateriaLiberada()).toBeNull();
+      await servico.pedirBateriaNaPrimeiraVez();
+      expect(preferenciasService.obter().bateriaPedida).toBe(false);
+    });
+
     it('a unidade de peso vale no cartão de emergência', () => {
       const emergencia = new EmergenciaService();
       new TutorService().salvar(new Tutor({ nome: 'Ana' }));

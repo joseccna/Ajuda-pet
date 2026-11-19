@@ -17,22 +17,22 @@ const PASSOS = [
   {
     titulo: '2. Libere o app da economia de bateria',
     texto:
-      'Alguns celulares, como Samsung, Xiaomi e Motorola, fecham apps para economizar bateria e atrasam os avisos. Em Apps, Ajuda Pet, Bateria, escolha "Sem restrições".',
+      'Muitos celulares, como vivo, Samsung, Xiaomi e Motorola, seguram os avisos até você abrir o app, para economizar bateria. Em Apps, Ajuda Pet, Bateria (na vivo, Energia), escolha "Sem restrições" (na vivo, "Nenhuma restrição").',
   },
   {
-    titulo: '3. Confira os modos de foco',
+    titulo: '3. Não feche o app pela lista de recentes',
+    texto:
+      'Arrastar o Ajuda Pet para fora da lista de apps recentes, ou usar "Forçar parada", pode cancelar os avisos até você abrir o app de novo.',
+  },
+  {
+    titulo: '4. Confira os modos de foco',
     texto:
       'O "Não perturbe" e os modos de foco silenciam os avisos. Libere o Ajuda Pet nessas listas ou desligue o modo.',
   },
   {
-    titulo: '4. Abra o app de vez em quando',
+    titulo: '5. Abra o app de vez em quando',
     texto:
-      'O app agenda os avisos dos próximos 90 dias toda vez que você abre. Se ficar muito tempo sem abrir, os avisos podem acabar.',
-  },
-  {
-    titulo: '5. Testando pelo Expo Go?',
-    texto:
-      'Em algumas versões do Expo Go no Android as notificações são limitadas. Para testar de verdade, instale uma versão de teste do app (development build).',
+      'Toda vez que você abre, o app agenda os avisos dos próximos dias (as refeições, para 7 dias). Se ficar muito tempo sem abrir, os avisos podem acabar.',
   },
 ];
 

@@ -29,3 +29,23 @@ export function useNotificacoes() {
 
   return { estado, pedir };
 }
+
+/**
+ * O app está fora da economia de bateria? true, false ou null (não dá para saber).
+ * Confere de novo ao voltar à tela (o usuário pode ter mudado nas configurações).
+ */
+export function useBateria() {
+  const [liberada, setLiberada] = useState(null);
+  const atualizar = useCallback(() => {
+    notificacaoService.bateriaLiberada().then(setLiberada);
+  }, []);
+  useFocusEffect(atualizar);
+
+  const pedir = useCallback(async () => {
+    const nova = await notificacaoService.pedirLiberarBateria();
+    setLiberada(nova);
+    return nova;
+  }, []);
+
+  return { liberada, pedir };
+}

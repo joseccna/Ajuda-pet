@@ -9,7 +9,7 @@ import { ChipSelector } from '../components/ui/ChipSelector';
 import { LinhaSwitch } from '../components/ui/LinhaSwitch';
 import { Screen } from '../components/ui/Screen';
 import { Texto } from '../components/ui/Texto';
-import { useNotificacoes } from '../hooks/useAgenda';
+import { useBateria, useNotificacoes } from '../hooks/useAgenda';
 import { usePreferencias } from '../hooks/usePreferencias';
 import { mascararHora } from '../models/regrasConsulta';
 import {
@@ -45,6 +45,7 @@ export default function Preferencias() {
   const { paleta, preferencia: tema, definirPreferencia } = useTheme();
   const prefs = usePreferencias();
   const { estado, pedir } = useNotificacoes();
+  const bateria = useBateria();
 
   const [horario, setHorario] = useState(prefs.horarioPadrao);
   const [meta, setMeta] = useState(String(prefs.metaPasseioMin));
@@ -191,6 +192,39 @@ export default function Preferencias() {
             />
           </View>
         ) : null}
+        {estado.disponivel && estado.permitido && bateria.liberada === true ? (
+          <Texto variante="legenda" cor="destaque" style={{ marginTop: espaco.sm }}>
+            O Ajuda Pet está fora da economia de bateria: os avisos chegam na hora.
+          </Texto>
+        ) : null}
+        {estado.disponivel && estado.permitido && bateria.liberada !== true ? (
+          <View style={[styles.bateria, { backgroundColor: paleta.cartao, borderColor: paleta.linha }]}>
+            <View style={styles.bateriaTopo}>
+              <Ionicons name="battery-charging-outline" size={24} color={paleta.primarioTexto} />
+              <View style={{ flex: 1 }}>
+                <Texto variante="corpoMedio">Para os avisos chegarem na hora</Texto>
+                <Texto variante="legenda">
+                  {bateria.liberada === false
+                    ? 'O app está na economia de bateria, e muitos celulares seguram os avisos até você abrir o app. Toque em Liberar e escolha Permitir.'
+                    : 'Muitos celulares seguram os avisos até você abrir o app, para economizar bateria. Nas configurações do Ajuda Pet, abra Bateria (ou Energia) e escolha “Sem restrições” (ou “Nenhuma restrição”).'}
+                </Texto>
+              </View>
+            </View>
+            {bateria.liberada === false ? (
+              <Button
+                titulo="Liberar da economia de bateria"
+                icone="battery-charging-outline"
+                aoPressionar={bateria.pedir}
+              />
+            ) : null}
+            <Button
+              titulo="Abrir configurações do app"
+              icone="settings-outline"
+              variante="secundario"
+              aoPressionar={() => Linking.openSettings()}
+            />
+          </View>
+        ) : null}
         <View style={{ marginTop: espaco.sm, alignItems: 'flex-start' }}>
           <Button
             titulo="Lembretes não chegam?"
@@ -304,6 +338,14 @@ const styles = StyleSheet.create({
     borderRadius: raio.lg,
     padding: espaco.md,
   },
+  bateria: {
+    marginTop: espaco.sm,
+    gap: espaco.md,
+    borderWidth: 1,
+    borderRadius: raio.lg,
+    padding: espaco.md,
+  },
+  bateriaTopo: { flexDirection: 'row', alignItems: 'flex-start', gap: espaco.md },
   lista: { borderWidth: 1, borderRadius: raio.lg, overflow: 'hidden' },
   atalho: {
     minHeight: 64,

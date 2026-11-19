@@ -33,6 +33,7 @@ export const PADROES = {
   ultimoBackupEm: null,
   /** O app já pediu a permissão de notificação na primeira abertura? */
   notificacaoPedida: false,
+  bateriaPedida: false,
 };
 
 /** Lista de atalhos sem repetidos nem chaves desconhecidas; se ficar vazia, volta ao padrão. */
@@ -71,6 +72,7 @@ export function normalizar(entrada = {}) {
         ? entrada.ultimoBackupEm
         : null,
     notificacaoPedida: entrada.notificacaoPedida === true,
+    bateriaPedida: entrada.bateriaPedida === true,
   };
 }
 

@@ -56,7 +56,9 @@ export default function RaizLayout() {
     notificacaoService
       .configurar()
       .then(() => notificacaoService.pedirNaPrimeiraVez())
-      .then(() => notificacaoService.reagendar());
+      .then(() => notificacaoService.reagendar())
+      // Depois de agendar, para os avisos não esperarem a resposta da janela.
+      .then(() => notificacaoService.pedirBateriaNaPrimeiraVez());
     const assinatura = AppState.addEventListener('change', (estado) => {
       if (estado === 'active') notificacaoService.reagendarEmBreve();
     });

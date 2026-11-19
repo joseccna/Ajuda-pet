@@ -36,6 +36,39 @@ function carregarNativo() {
 }
 
 /**
+ * Economia de bateria do Android. Muitos celulares (vivo, Samsung, Xiaomi...) seguram os avisos
+ * até o app ser aberto quando ele está na economia de bateria. O app não pode mudar isso sozinho:
+ * pede ao Android a janela "Permitir que o app sempre seja executado em segundo plano?".
+ * Fora do Android, ou sem os módulos, devolve null (não dá para saber nem pedir).
+ */
+function carregarBateria() {
+  if (plataforma() !== 'android') return null;
+  try {
+    const Battery = require('expo-battery');
+    const IntentLauncher = require('expo-intent-launcher');
+    const Application = require('expo-application');
+    return {
+      otimizacaoLigada: () => Battery.isBatteryOptimizationEnabledAsync(),
+      pedirLiberacao: async () => {
+        try {
+          await IntentLauncher.startActivityAsync(
+            IntentLauncher.ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+            { data: `package:${Application.applicationId}` },
+          );
+        } catch {
+          // Alguns celulares não têm a janela: abre a lista de apps da economia de bateria.
+          await IntentLauncher.startActivityAsync(
+            IntentLauncher.ActivityAction.IGNORE_BATTERY_OPTIMIZATION_SETTINGS,
+          );
+        }
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Notificações locais (sem servidor). A cada atualização, apaga as agendadas e agenda de novo
  * as dos próximos dias, a partir dos eventos da agenda. Só funciona com a permissão do usuário.
  */
@@ -45,11 +78,13 @@ export class NotificacaoService {
     nativo = undefined,
     preferencias = preferenciasService,
     alimentacao = alimentacaoService,
+    bateria = undefined,
   ) {
     this.agenda = agenda;
     this.preferencias = preferencias;
     this.alimentacao = alimentacao;
     this._nativo = nativo;
+    this._bateria = bateria;
     this.ocupado = false;
     this.pendente = false;
     this.temporizador = null;
@@ -58,6 +93,55 @@ export class NotificacaoService {
   get nativo() {
     if (this._nativo === undefined) this._nativo = carregarNativo();
     return this._nativo;
+  }
+
+  get bateria() {
+    if (this._bateria === undefined) this._bateria = carregarBateria();
+    return this._bateria;
+  }
+
+  /**
+   * O app está fora da economia de bateria? true (liberado), false (ainda na economia)
+   * ou null (não dá para saber neste celular).
+   */
+  async bateriaLiberada() {
+    const B = this.bateria;
+    if (!B) return null;
+    try {
+      return !(await B.otimizacaoLigada());
+    } catch {
+      return null;
+    }
+  }
+
+  /** Abre a janela do Android para liberar o app da economia de bateria. Devolve o estado novo. */
+  async pedirLiberarBateria() {
+    const B = this.bateria;
+    if (!B) return null;
+    try {
+      await B.pedirLiberacao();
+    } catch {
+      // segue para devolver o estado atual
+    }
+    return this.bateriaLiberada();
+  }
+
+  /**
+   * Uma vez só, depois da permissão de notificação: se os avisos estão ligados e o app ainda está
+   * na economia de bateria, pede para liberar. Quem recusar acha o botão em Preferências.
+   */
+  async pedirBateriaNaPrimeiraVez() {
+    if (this.preferencias.obter().bateriaPedida) return;
+    try {
+      const avisos = await this.estado();
+      if (!avisos.permitido) return;
+      const liberada = await this.bateriaLiberada();
+      if (liberada === null) return;
+      if (liberada === false) await this.pedirLiberarBateria();
+      this.preferencias.salvar({ bateriaPedida: true });
+    } catch {
+      // Sem como pedir: o app continua funcionando.
+    }
   }
 
   /** Define como a notificação aparece com o app aberto e cria o canal do Android. */
@@ -165,9 +249,7 @@ export class NotificacaoService {
       }
       // Os mais próximos primeiro: se o sistema congelar o app no meio (alguns celulares fazem isso
       // logo que ele sai da tela), os avisos que chegam antes já estão agendados.
-      const todos = [...plano, ...(backup ? [backup] : []), ...refeicoes].sort(
-        (a, b) => a.quando - b.quando,
-      );
+      const todos = [...plano, ...(backup ? [backup] : []), ...refeicoes].sort((a, b) => a.quando - b.quando);
       let agendadas = 0;
       const comecou = Date.now();
       for (const item of todos) {

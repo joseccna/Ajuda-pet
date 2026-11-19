@@ -40,6 +40,7 @@ describe('normalizar', () => {
       lembreteBackupDias: 30,
       ultimoBackupEm: null,
       notificacaoPedida: false,
+      bateriaPedida: false,
     });
   });
   it('valores inválidos voltam ao padrão', () => {
