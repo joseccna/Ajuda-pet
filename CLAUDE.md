@@ -47,12 +47,11 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Versão 1.1.0 aprovada no celular (versão no app, sem microfone, botão "Novo plano", avisos
   por cima de outros apps, aviso de 1 h depois).
-- Versão 1.1.1 com o pedido de liberar da economia de bateria (ccb56e5) e a faixa no painel
-  quando as notificações estão desligadas ou o app está na economia de bateria (c0b1110):
-  build EAS 3453d4ad (compilação 4), **aguardando o teste do usuário**. Dúvida principal: o "Permitir" da janela do
-  Android muda a tela Energia da vivo para "Nenhuma restrição"?
-- `main` parado em 5c99e7d. Depois da aprovação, com OK do usuário: levar o `desenvolvimento`
-  ao `main` (`git merge --ff-only`) e criar as etiquetas `v1.1.0` e `v1.1.1`.
+- Versão 1.1.1 aprovada no celular: o app pede para liberar da economia de bateria, e o painel
+  mostra uma faixa quando as notificações estão desligadas ou o app está na economia de bateria.
+  Na vivo, o botão leva à tela de liberação e o usuário escolhe "Nenhuma restrição".
+- `main` igual ao `desenvolvimento` em 2026-11-19, com as etiquetas `v1.1.0` (81b59cf) e
+  `v1.1.1` (c0b1110). A próxima entrega sobe a versão no `app.json`.
 
 ## Pendências
 
