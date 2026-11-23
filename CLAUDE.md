@@ -22,7 +22,7 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Trabalho no branch `desenvolvimento`. Levar ao `main` (e criar etiquetas de versão) **só com OK
   do usuário**.
-- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (352 testes em 2026-11-19).
+- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (357 testes em 2026-11-23).
 - Migrações do banco (`src/database/migracoes.js`): só acrescentar no fim. A última é a 13.
 - Versão: `version` do `app.json` em MAIOR.MENOR.CORREÇÃO, subir a cada entrega. O número da
   compilação (versionCode) fica na nuvem do EAS (`appVersionSource: remote`, `autoIncrement` no
@@ -52,6 +52,12 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
   Na vivo, o botão leva à tela de liberação e o usuário escolhe "Nenhuma restrição".
 - `main` igual ao `desenvolvimento` em 2026-11-19, com as etiquetas `v1.1.0` (81b59cf) e
   `v1.1.1` (c0b1110). A próxima entrega sobe a versão no `app.json`.
+- 2026-11-23: avaliação técnica de um colega (apresentação TDS02, commit aa8501f) achou
+  BUG-01 (nascimento aproximado virava exato ao editar o pet) e BUG-02 (aviso às 23:30 de um
+  evento às 00:30 dizia "Hoje"). Corrigidos na 1.1.2 (bf956f1), com testes QA-01 a QA-04.
+  Pacotes do Expo atualizados (`expo install --fix`) e `npm audit fix`: auditoria de 23 para 6
+  itens; os 3 altos restantes (query-string/decode-uri-component dentro do expo-router) só
+  saem no SDK 58. Build EAS cd4b87ca, **aguardando o teste do usuário**.
 
 ## Pendências
 
