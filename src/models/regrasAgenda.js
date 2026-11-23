@@ -177,11 +177,14 @@ export function planejarNotificacoes(eventos, agora, config = {}) {
     // Lembrete criado em cima da hora (a 1 hora antes já passou): avisa na hora do evento.
     if (e.hora && quandoDia <= agora) quandoDia = dataComHora(e.data, e.hora);
     if (quandoDia > agora) {
+      // O texto vale para o momento em que o aviso aparece: um evento às 00:30 avisa às 23:30
+      // da véspera, então é "Amanhã às 00:30", não "Hoje".
+      const naVespera = paraISO(quandoDia) !== e.data;
       itens.push({
         chave: `${e.chave}|${e.data}|dia`,
         quando: quandoDia,
         titulo: e.titulo,
-        corpo: e.hora ? `Hoje às ${e.hora}` : 'É hoje',
+        corpo: e.hora ? `${naVespera ? 'Amanhã' : 'Hoje'} às ${e.hora}` : 'É hoje',
         rota: e.rota ?? null,
       });
     }

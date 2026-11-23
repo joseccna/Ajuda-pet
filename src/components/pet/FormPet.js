@@ -4,8 +4,7 @@ import { useNavigation } from 'expo-router';
 import { Pet } from '../../models/Pet';
 import { ErroValidacao, petService } from '../../services/PetService';
 import { espaco } from '../../theme';
-import { nascimentoVazio, resolverNascimento } from '../../utils/nascimento';
-import { formatarDataBR } from '../../utils/datas';
+import { nascimentoDoPet, nascimentoVazio, resolverNascimento } from '../../utils/nascimento';
 import { Button } from '../ui/Button';
 import { Campo } from '../ui/Campo';
 import { ChipSelector } from '../ui/ChipSelector';
@@ -35,9 +34,7 @@ function estadoDe(pet) {
     especieOutra: pet.especieOutra,
     raca: pet.raca,
     sexo: pet.sexo,
-    nascimento: pet.nascimento
-      ? { modo: 'exata', texto: formatarDataBR(pet.nascimento), anos: '', meses: '' }
-      : nascimentoVazio,
+    nascimento: nascimentoDoPet(pet.nascimento, pet.nascimentoAproximado),
     cor: pet.cor,
     microchip: pet.microchip,
     castrado: pet.castrado,

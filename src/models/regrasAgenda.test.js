@@ -173,6 +173,16 @@ describe('planejarNotificacoes', () => {
       agora,
     );
     expect(plano[0].quando.getTime()).toBe(new Date(2026, 9, 4, 23, 30).getTime());
+    // BUG-02 (avaliação técnica, QA-03): o aviso aparece na véspera, então é "Amanhã".
+    expect(plano[0].corpo).toBe('Amanhã às 00:30');
+  });
+  it('aviso no mesmo dia do evento continua "Hoje" (QA-04, controle)', () => {
+    const plano = planejarNotificacoes(
+      [ev('noite', '2026-10-05', { hora: '01:30', antecedenciaDias: 0 })],
+      agora,
+    );
+    expect(plano[0].quando.getTime()).toBe(new Date(2026, 9, 5, 0, 30).getTime());
+    expect(plano[0].corpo).toBe('Hoje às 01:30');
   });
   it('ordena por horário e corta no limite', () => {
     const lista = ['2026-10-30', '2026-10-10', '2026-10-20'].map((d) => ev(d, d, { antecedenciaDias: 0 }));
