@@ -63,9 +63,13 @@ export function ocorrenciasNoIntervalo(dataISO, repetir, inicioISO, fimISO) {
  * Estado de um evento em relação a hoje:
  * atrasado (já passou e continua pendente), hoje, futuro ou passado (já aconteceu, só histórico).
  */
-export function estadoPorData(dataISO, hojeISO, pendente = true) {
+export function estadoPorData(dataISO, hojeISO, pendente = true, hora = '', horaAgora = '') {
   if (dataISO < hojeISO) return pendente ? 'atrasado' : 'passado';
-  if (dataISO === hojeISO) return 'hoje';
+  if (dataISO === hojeISO) {
+    // Pendente de hoje com hora marcada que já passou: atrasado (como as refeições).
+    if (pendente && hora && horaAgora && hora < horaAgora) return 'atrasado';
+    return 'hoje';
+  }
   return 'futuro';
 }
 
@@ -131,8 +135,9 @@ export function mudarMes({ ano, mes }, delta) {
 }
 
 /** "dias" em texto: "Hoje", "Amanhã", "Em 5 dias", "3 dias além da data". */
-export function textoDias(dias, hora = '') {
+export function textoDias(dias, hora = '', horaAgora = '') {
   const sufixo = hora ? `, ${hora}` : '';
+  if (dias === 0 && hora && horaAgora && hora < horaAgora) return `Passou das ${hora}, ainda pendente`;
   if (dias < 0) {
     const n = -dias;
     return `${n} ${n === 1 ? 'dia' : 'dias'} além da data`;

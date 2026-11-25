@@ -129,6 +129,17 @@ suite('integração da agenda e das notificações', () => {
       avulsos.excluir(a.id);
       avulsos.excluir(b.id);
     });
+
+    it('de hoje, com a hora já passada, fica atrasado no painel e na agenda', () => {
+      const l = avulsos.salvar(novo({ titulo: 'Remédio', data: '2026-10-02', hora: '00:30' }));
+      const [evento] = avulsos.eventos('2026-10-02', '2026-10-02', HOJE);
+      expect(evento.estado).toBe('atrasado');
+      expect(evento.texto).toBe('Passou das 00:30, ainda pendente');
+      const [noPainel] = new PainelService([avulsos]).montar(HOJE).hoje;
+      expect(noPainel.texto).toBe('Passou das 00:30, ainda pendente');
+      expect(noPainel.atrasado).toBe(true);
+      avulsos.excluir(l.id);
+    });
   });
 
   describe('agenda com todos os módulos', () => {

@@ -8,6 +8,7 @@ import {
   ocorrenciasNoIntervalo,
   textoDias,
 } from '../models/regrasAgenda';
+import { horaDe } from '../models/regrasConsulta';
 import { diferencaEmDias, paraISO } from '../utils/datas';
 
 export class ErroValidacaoLembrete extends Error {
@@ -50,20 +51,21 @@ export class LembreteAvulsoService {
   /** Eventos da agenda no intervalo, incluindo as repetições. */
   eventos(inicioISO, fimISO, hoje = new Date()) {
     const hojeISO = paraISO(hoje);
+    const agora = horaDe(hoje);
     const pets = new Map(this.pets.listarAtivos().map((p) => [p.id, p]));
     const resultado = [];
     for (const l of this.repo.pendentesDePetsAtivos()) {
       const pet = pets.get(l.petId);
       if (!pet) continue;
       for (const data of ocorrenciasNoIntervalo(l.data, l.repetir, inicioISO, fimISO)) {
-        const estado = estadoPorData(data, hojeISO);
+        const estado = estadoPorData(data, hojeISO, true, l.hora, agora);
         resultado.push(
           criarEvento({
             chave: `avulso-${l.id}`,
             petId: pet.id,
             petNome: pet.nome,
             titulo: `${l.titulo} ${pet.deNome}`,
-            texto: textoDias(diferencaEmDias(hojeISO, data), l.hora),
+            texto: textoDias(diferencaEmDias(hojeISO, data), l.hora, agora),
             data,
             hora: l.hora,
             estado,
@@ -80,6 +82,7 @@ export class LembreteAvulsoService {
   /** Para o painel do dia: os lembretes atrasados, de hoje e dos próximos 14 dias. */
   lembretes(hoje = new Date()) {
     const hojeISO = paraISO(hoje);
+    const agora = horaDe(hoje);
     const pets = new Map(this.pets.listarAtivos().map((p) => [p.id, p]));
     const resultado = [];
     for (const l of this.repo.pendentesDePetsAtivos()) {
@@ -93,8 +96,9 @@ export class LembreteAvulsoService {
           petId: pet.id,
           petNome: pet.nome,
           titulo: `${l.titulo} ${pet.deNome}`,
-          texto: textoDias(dias, l.hora),
+          texto: textoDias(dias, l.hora, agora),
           dias,
+          atrasado: estadoPorData(l.data, hojeISO, true, l.hora, agora) === 'atrasado' && dias === 0,
           data: l.data,
           icone: iconeDoTipo(l.tipo),
           rota: { pathname: '/lembrete', params: { lembreteId: l.id } },

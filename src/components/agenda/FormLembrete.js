@@ -43,6 +43,8 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
   function escolherTipo(valor) {
     const rotulo = TIPOS_LEMBRETE.find((t) => t.valor === valor)?.rotulo ?? '';
     setE((a) => ({ ...a, tipo: valor, titulo: a.titulo.trim() === '' ? rotulo : a.titulo }));
+    // O título pode ter acabado de ser preenchido com o tipo: tira o aviso de título vazio.
+    setErros((a) => ({ ...a, titulo: undefined }));
   }
 
   function salvar() {

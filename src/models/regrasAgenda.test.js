@@ -61,6 +61,15 @@ describe('estado e cores', () => {
     expect(estadoPorData(HOJE, HOJE)).toBe('hoje');
     expect(estadoPorData('2026-10-18', HOJE)).toBe('futuro');
   });
+  it('pendente de hoje cuja hora já passou fica atrasado', () => {
+    expect(estadoPorData(HOJE, HOJE, true, '08:00', '12:00')).toBe('atrasado');
+    expect(estadoPorData(HOJE, HOJE, true, '12:00', '12:00')).toBe('hoje'); // ainda é a hora
+    expect(estadoPorData(HOJE, HOJE, true, '18:00', '12:00')).toBe('hoje');
+    expect(estadoPorData(HOJE, HOJE, true, '', '12:00')).toBe('hoje'); // sem hora: vale o dia
+    expect(estadoPorData(HOJE, HOJE, false, '08:00', '12:00')).toBe('hoje'); // não pendente
+    expect(textoDias(0, '08:00', '12:00')).toBe('Passou das 08:00, ainda pendente');
+    expect(textoDias(0, '18:00', '12:00')).toBe('Hoje, 18:00');
+  });
   it('dá uma cor por estado e junta as cores do dia sem repetir', () => {
     expect(corDoPonto('atrasado')).toBe('coral');
     expect(corDoPonto('hoje')).toBe('verde');
