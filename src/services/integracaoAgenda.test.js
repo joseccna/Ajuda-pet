@@ -20,6 +20,7 @@ jest.mock('react-native', () => ({ Platform: { OS: 'android' } }));
 
 import { Database } from '../database/Database';
 import { DeviceIdentity } from '../database/DeviceIdentity';
+import { mudancas } from '../database/mudancas';
 import { Consulta } from '../models/Consulta';
 import { LembreteAvulso } from '../models/LembreteAvulso';
 import { Pet } from '../models/Pet';
@@ -328,6 +329,34 @@ suite('integração da agenda e das notificações', () => {
         importance: 4,
       });
       expect(nativo.deleteNotificationChannelAsync).toHaveBeenCalledWith('lembretes');
+    });
+
+    it('qualquer gravação no banco avisa, para as notificações serem agendadas de novo', () => {
+      const tabelas = [];
+      const parar = mudancas.assinar((t) => tabelas.push(t));
+      const l = avulsos.salvar(novo({ titulo: 'Remédio', data: '2026-10-02', hora: '20:37' }));
+      avulsos.excluir(l.id);
+      parar();
+      avulsos.salvar(novo({ titulo: 'Depois de parar de ouvir' }));
+      expect(tabelas.length).toBe(2);
+      expect(new Set(tabelas).size).toBe(1);
+    });
+
+    it('ao ir para o fundo, faz na hora o reagendamento que estava esperando', () => {
+      jest.useFakeTimers();
+      try {
+        const servico = new NotificacaoService(agenda, nativoFalso());
+        servico.reagendar = jest.fn();
+        servico.reagendarSePendente();
+        expect(servico.reagendar).not.toHaveBeenCalled(); // nada esperando
+        servico.reagendarEmBreve();
+        servico.reagendarSePendente();
+        expect(servico.reagendar).toHaveBeenCalledTimes(1);
+        jest.runAllTimers();
+        expect(servico.reagendar).toHaveBeenCalledTimes(1); // não repete quando o tempo acaba
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('ao tocar numa notificação, entrega a rota', () => {

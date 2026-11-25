@@ -1,4 +1,5 @@
 import { Consulta } from '../../models/Consulta';
+import { mudancas } from '../mudancas';
 import { DeviceIdentity } from '../DeviceIdentity';
 import { BaseRepository } from './BaseRepository';
 
@@ -51,5 +52,6 @@ export class ConsultaRepository extends BaseRepository {
       );
     }
     this.excluir(id);
+    mudancas.avisar(this.tabela);
   }
 }

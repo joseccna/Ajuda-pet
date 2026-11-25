@@ -1,4 +1,5 @@
 import { RegistroCuidado } from '../../models/RegistroCuidado';
+import { mudancas } from '../mudancas';
 import { DeviceIdentity } from '../DeviceIdentity';
 import { BaseRepository } from './BaseRepository';
 
@@ -30,5 +31,6 @@ export class RegistroCuidadoRepository extends BaseRepository {
       [agora, agora, DeviceIdentity.id, id],
     );
     this.excluir(id);
+    mudancas.avisar(this.tabela);
   }
 }

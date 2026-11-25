@@ -1,4 +1,5 @@
 import { TipoCuidado } from '../../models/TipoCuidado';
+import { mudancas } from '../mudancas';
 import { DeviceIdentity } from '../DeviceIdentity';
 import { BaseRepository } from './BaseRepository';
 
@@ -42,5 +43,6 @@ export class TipoCuidadoRepository extends BaseRepository {
       [agora, agora, quem, id],
     );
     this.excluir(id);
+    mudancas.avisar(this.tabela);
   }
 }

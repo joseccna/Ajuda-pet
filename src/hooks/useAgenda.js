@@ -9,7 +9,7 @@ import { notificacaoService } from '../services/NotificacaoService';
 export function useAgenda(ano, mes) {
   const [dados, setDados] = useState(() => ({ grade: gradeDoMes(ano, mes), eventos: [] }));
   const recarregar = useCallback(() => setDados(agendaService.doMes(ano, mes)), [ano, mes]);
-  useFocusEffect(recarregar);
+  useAoVoltar(recarregar);
   return { ...dados, recarregar };
 }
 

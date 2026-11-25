@@ -10,6 +10,7 @@ import { Lora_500Medium } from '@expo-google-fonts/lora';
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
 import { Database } from '../database/Database';
 import { DeviceIdentity } from '../database/DeviceIdentity';
+import { mudancas } from '../database/mudancas';
 import { notificacaoService } from '../services/NotificacaoService';
 import { preferenciasService } from '../services/PreferenciasService';
 import { ThemeProvider, useTheme } from '../theme';
@@ -61,12 +62,16 @@ export default function RaizLayout() {
       .then(() => notificacaoService.pedirBateriaNaPrimeiraVez());
     const assinatura = AppState.addEventListener('change', (estado) => {
       if (estado === 'active') notificacaoService.reagendarEmBreve();
+      else if (estado === 'background') notificacaoService.reagendarSePendente();
     });
     // Mudou o horário ou a antecedência dos avisos: agenda de novo.
     const parar = preferenciasService.assinar(() => notificacaoService.reagendarEmBreve());
+    // Qualquer gravação no banco (lembrete, dose, cuidado, consulta...): agenda de novo.
+    const pararDados = mudancas.assinar(() => notificacaoService.reagendarEmBreve());
     return () => {
       assinatura.remove();
       parar();
+      pararDados();
     };
   }, [bancoPronto]);
 

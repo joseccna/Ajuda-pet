@@ -1,4 +1,5 @@
 import { DoseVacina } from '../../models/DoseVacina';
+import { mudancas } from '../mudancas';
 import { DeviceIdentity } from '../DeviceIdentity';
 import { BaseRepository } from './BaseRepository';
 
@@ -30,5 +31,6 @@ export class DoseVacinaRepository extends BaseRepository {
        WHERE tipo_id = ? AND excluido_em IS NULL`,
       [agora, agora, DeviceIdentity.id, tipoId],
     );
+    mudancas.avisar(this.tabela);
   }
 }

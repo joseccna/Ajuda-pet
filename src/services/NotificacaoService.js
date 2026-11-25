@@ -308,6 +308,17 @@ export class NotificacaoService {
     }
   }
 
+  /**
+   * Se há um reagendamento esperando o tempo de juntar chamadas, faz agora. Usado quando o app
+   * vai para o fundo: o sistema pode congelá-lo antes de o tempo acabar.
+   */
+  reagendarSePendente() {
+    if (!this.temporizador) return;
+    clearTimeout(this.temporizador);
+    this.temporizador = null;
+    this.reagendar();
+  }
+
   /** Agenda de novo daqui a pouco, juntando várias chamadas seguidas em uma só. */
   reagendarEmBreve(esperaMs = 1500) {
     if (this.temporizador) clearTimeout(this.temporizador);

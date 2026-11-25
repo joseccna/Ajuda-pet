@@ -1,5 +1,6 @@
 import { Database } from '../Database';
 import { DeviceIdentity } from '../DeviceIdentity';
+import { mudancas } from '../mudancas';
 /**
  * CRUD genérico. Cada repositório define só a tabela, a conversão de linha
  * e as consultas específicas. É o único lugar do app com SQL.
@@ -54,6 +55,7 @@ export class BaseRepository {
         ...nomes.map((n) => todas[n]),
       ]);
     }
+    mudancas.avisar(this.tabela);
     return modelo;
   }
   /** Exclusão lógica: o registro some das listas, mas continua no banco e vai junto no backup. */
@@ -63,5 +65,6 @@ export class BaseRepository {
       `UPDATE ${this.tabela} SET excluido_em = ?, atualizado_em = ?, autor_dispositivo_id = ? WHERE id = ?`,
       [agora, agora, DeviceIdentity.id, id],
     );
+    mudancas.avisar(this.tabela);
   }
 }
