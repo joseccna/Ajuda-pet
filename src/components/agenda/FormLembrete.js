@@ -1,10 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { LembreteAvulso } from '../../models/LembreteAvulso';
+import { dicaDoTipo, registroDoLembrete } from '../../models/regrasLembrete';
 import { ANTECEDENCIAS, REPETICOES, TIPOS_LEMBRETE } from '../../models/regrasAgenda';
 import { lerHora, mascararHora } from '../../models/regrasConsulta';
 import { useConfirmarSaida } from '../../hooks/useConfirmarSaida';
+import { cuidadoService } from '../../services/CuidadoService';
 import { ErroValidacaoLembrete, lembreteAvulsoService } from '../../services/LembreteAvulsoService';
+import { vacinaService } from '../../services/VacinaService';
+import { espaco, raio, useTheme } from '../../theme';
 import { formatarDataBR, lerDataBR, mascararDataBR, paraISO } from '../../utils/datas';
 import { Button } from '../ui/Button';
 import { Campo } from '../ui/Campo';
@@ -17,6 +23,8 @@ import { Texto } from '../ui/Texto';
  */
 export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalvar, aoExcluir }) {
   const editando = Boolean(lembrete);
+  const router = useRouter();
+  const { paleta } = useTheme();
 
   const inicial = useMemo(
     () => ({
@@ -78,10 +86,51 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
     }
   }
 
+  /**
+   * Vacina, cuidado e consulta têm registro próprio no pet: pergunta se quer registrar lá também,
+   * para o histórico ficar completo e a próxima data ser calculada.
+   */
   function marcarFeito() {
-    lembreteAvulsoService.concluir(lembrete.id);
+    const concluir = () => {
+      lembreteAvulsoService.concluir(lembrete.id);
+      liberarSaida();
+    };
+    const destino = registroDoLembrete(
+      { petId: e.petId, tipo: e.tipo, titulo: e.titulo },
+      { vacinas: vacinaService.tiposDoPet(e.petId), cuidados: cuidadoService.tiposDoPet(e.petId) },
+    );
+    if (!destino) {
+      concluir();
+      aoSalvar();
+      return;
+    }
+    Alert.alert(
+      'Marcar como feito',
+      `Quer registrar também ${destino.onde}? Assim o histórico do pet fica completo.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Só marcar',
+          onPress: () => {
+            concluir();
+            aoSalvar();
+          },
+        },
+        {
+          text: destino.rotulo,
+          onPress: () => {
+            concluir();
+            router.replace({ pathname: destino.pathname, params: destino.params });
+          },
+        },
+      ],
+    );
+  }
+
+  const dica = editando ? null : dicaDoTipo(e.tipo, e.petId);
+  function irParaDica() {
     liberarSaida();
-    aoSalvar();
+    router.replace(dica.rota);
   }
 
   function confirmarExclusao() {
@@ -121,6 +170,17 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
         aoMudar={escolherTipo}
         opcoes={TIPOS_LEMBRETE.map((t) => ({ valor: t.valor, rotulo: t.rotulo }))}
       />
+      {dica ? (
+        <View style={[styles.dica, { backgroundColor: paleta.cartao, borderColor: paleta.linha }]}>
+          <View style={styles.dicaTopo}>
+            <Ionicons name="information-circle-outline" size={22} color={paleta.primarioTexto} />
+            <Texto variante="legenda" style={{ flex: 1 }}>
+              {dica.texto}
+            </Texto>
+          </View>
+          <Button titulo={dica.botao} variante="secundario" aoPressionar={irParaDica} />
+        </View>
+      ) : null}
       <Campo
         rotulo="Título"
         obrigatorio
@@ -198,3 +258,15 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  dica: {
+    gap: espaco.md,
+    borderWidth: 1,
+    borderRadius: raio.lg,
+    padding: espaco.md,
+    marginTop: -espaco.sm,
+    marginBottom: espaco.lg,
+  },
+  dicaTopo: { flexDirection: 'row', alignItems: 'flex-start', gap: espaco.sm },
+});
