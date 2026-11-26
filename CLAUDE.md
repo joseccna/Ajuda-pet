@@ -22,7 +22,7 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Trabalho no branch `desenvolvimento`. Levar ao `main` (e criar etiquetas de versão) **só com OK
   do usuário**.
-- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (361 testes em 2026-11-25).
+- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (369 testes em 2026-11-25).
 - Migrações do banco (`src/database/migracoes.js`): só acrescentar no fim. A última é a 13.
 - Versão: `version` do `app.json` em MAIOR.MENOR.CORREÇÃO, subir a cada entrega. O número da
   compilação (versionCode) fica na nuvem do EAS (`appVersionSource: remote`, `autoIncrement` no
@@ -64,6 +64,10 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
   41a1da4. A cota gratuita do EAS acabou até 2026-12-01: APK gerado no computador (clone em
   pasta curta, `gradlew app:assembleRelease`), assinado com a chave de debug, então no celular
   precisa backup, desinstalar e instalar. **Aguardando o teste do usuário.**
+- 69d3ec3: lembrete de Vacina/Banho e tosa/Outro cuidado/Consulta, ao ser marcado como feito,
+  pergunta se quer registrar no pet e abre a dose, o registro do cuidado ou a consulta
+  (`src/models/regrasLembrete.js`); ao criar um desses, uma dica leva à carteirinha, aos
+  cuidados ou à consulta. Testado no emulador (APK local).
 - Material da apresentação do grupo num doc do Claude ("Ajuda Pet — material para a
   apresentação"), com prints feitos no emulador com dados fictícios (Ana Souza, Luna, Mingau).
 
