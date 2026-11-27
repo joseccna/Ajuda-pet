@@ -13,8 +13,9 @@ import { Texto } from '../ui/Texto';
 /**
  * Registra (ou edita) uma dose de vacina.
  * A próxima dose é calculada pelo intervalo do tipo, mas pode ser ajustada à mão.
+ * aoAdicionarTipo: leva ao cadastro de outra vacina (numa dose nova, a lista pode não ter a que se quer).
  */
-export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
+export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir, aoAdicionarTipo }) {
   const editando = Boolean(dose);
   const [tipoId, setTipoId] = useState(dose?.tipoId ?? tipoIdInicial ?? tipos[0]?.id ?? '');
   const tipo = tipos.find((t) => t.id === tipoId);
@@ -103,21 +104,34 @@ export function FormDose({ tipos, tipoIdInicial, dose, aoSalvar, aoExcluir }) {
 
   return (
     <View>
-      {editando || tipos.length === 1 ? (
+      {editando ? (
         <Texto variante="subtitulo" style={{ marginBottom: 16 }}>
           {tipo?.nome}
         </Texto>
       ) : (
-        <ChipSelector
-          rotulo="Vacina"
-          valor={tipoId}
-          aoMudar={(v) => {
-            setTipoId(v);
-            setE((a) => ({ ...a, rotulo: vacinaService.rotuloParaProximaDose(v) }));
-          }}
-          opcoes={tipos.map((t) => ({ valor: t.id, rotulo: t.nome }))}
-          erro={erros.tipo}
-        />
+        <View style={{ marginBottom: 16 }}>
+          <ChipSelector
+            rotulo="Vacina"
+            valor={tipoId}
+            aoMudar={(v) => {
+              setTipoId(v);
+              setE((a) => ({ ...a, rotulo: vacinaService.rotuloParaProximaDose(v) }));
+            }}
+            opcoes={tipos.map((t) => ({ valor: t.id, rotulo: t.nome }))}
+            erro={erros.tipo}
+          />
+          {aoAdicionarTipo ? (
+            <Button
+              titulo="Adicionar outra vacina"
+              icone="add"
+              variante="texto"
+              aoPressionar={() => {
+                liberarSaida();
+                aoAdicionarTipo();
+              }}
+            />
+          ) : null}
+        </View>
       )}
 
       <Campo

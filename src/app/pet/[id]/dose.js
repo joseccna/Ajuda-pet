@@ -51,6 +51,9 @@ export default function DoseDeVacina() {
           dose={dose}
           aoSalvar={() => router.back()}
           aoExcluir={() => router.back()}
+          aoAdicionarTipo={() =>
+            router.replace({ pathname: '/pet/[id]/vacina-nova', params: { id: pet.id } })
+          }
         />
       )}
     </Screen>
