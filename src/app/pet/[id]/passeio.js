@@ -57,6 +57,8 @@ function Marcacao({ rotulo, ligada, aoAlternar }) {
       >
         {rotulo}
       </Texto>
+      {/* Contrapeso do ✓, do mesmo tamanho: deixa o texto no centro do chip. */}
+      <View style={styles.contrapeso} importantForAccessibility="no" />
     </Pressable>
   );
 }
@@ -319,10 +321,12 @@ const styles = StyleSheet.create({
     minHeight: ALVO_MINIMO,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: espaco.xs,
-    paddingHorizontal: espaco.lg,
+    paddingHorizontal: espaco.md,
     borderRadius: 999,
     borderWidth: 1.5,
   },
+  contrapeso: { width: 18 },
   botoes: { flexDirection: 'row', gap: espaco.sm },
 });
