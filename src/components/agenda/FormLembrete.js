@@ -87,7 +87,7 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
   }
 
   /**
-   * Vacina, cuidado e consulta têm registro próprio no pet: pergunta se quer registrar lá também,
+   * Vacina, cuidado, consulta e passeio têm registro próprio no pet: pergunta se quer registrar lá também,
    * para o histórico ficar completo e a próxima data ser calculada.
    */
   function marcarFeito() {
@@ -96,7 +96,7 @@ export function FormLembrete({ pets, lembrete, petIdInicial, dataInicial, aoSalv
       liberarSaida();
     };
     const destino = registroDoLembrete(
-      { petId: e.petId, tipo: e.tipo, titulo: e.titulo },
+      { petId: e.petId, tipo: e.tipo, titulo: e.titulo, data: lembrete.data, hora: lembrete.hora },
       { vacinas: vacinaService.tiposDoPet(e.petId), cuidados: cuidadoService.tiposDoPet(e.petId) },
     );
     if (!destino) {

@@ -1,6 +1,9 @@
+import { paraISO } from '../utils/datas';
+
 /**
- * Liga os lembretes da Agenda aos registros do pet: vacina, cuidado e consulta têm um lugar
- * próprio no app (carteirinha, cuidados da Rotina, consultas da Saúde). Funções puras.
+ * Liga os lembretes da Agenda aos registros do pet: vacina, cuidado, consulta e passeio têm um
+ * lugar próprio no app (carteirinha, cuidados da Rotina, consultas da Saúde, passeios da Rotina).
+ * Funções puras.
  */
 
 /** Sem acento e em minúsculas, para comparar "Vermífugo" com "vermifugo". */
@@ -31,10 +34,11 @@ export function tipoPeloTitulo(titulo, tipos, reservas = []) {
 
 /**
  * Para onde levar quem marcou o lembrete como feito, para registrar no pet. null quando o tipo
- * não tem registro próprio (medicação, passeio).
+ * não tem registro próprio (medicação).
+ * hoje: aaaa-mm-dd; um passeio não pode ficar com data depois de hoje.
  * @returns {{ pathname: string, params: object, rotulo: string, onde: string } | null}
  */
-export function registroDoLembrete(lembrete, { vacinas = [], cuidados = [] } = {}) {
+export function registroDoLembrete(lembrete, { vacinas = [], cuidados = [], hoje = paraISO(new Date()) } = {}) {
   const id = lembrete.petId;
   if (lembrete.tipo === 'vacina') {
     const tipo = tipoPeloTitulo(lembrete.titulo, vacinas);
@@ -63,7 +67,29 @@ export function registroDoLembrete(lembrete, { vacinas = [], cuidados = [] } = {
       onde: 'a consulta na Saúde, com veterinário e anexos',
     };
   }
+  if (lembrete.tipo === 'passeio') {
+    return {
+      pathname: '/pet/[id]/passeio-registro',
+      params: { id, ...passeioDoLembrete(lembrete, hoje) },
+      rotulo: 'Registrar o passeio',
+      onde: 'o passeio no histórico da Rotina, com a duração',
+    };
+  }
   return null;
+}
+
+/**
+ * Valores para começar o registro do passeio: a data do lembrete (ou hoje, se ela ainda não
+ * chegou, pois o passeio já aconteceu), a hora só quando a data é a do lembrete, e o título
+ * como observação quando diz algo além de "Passeio".
+ */
+export function passeioDoLembrete(lembrete, hoje) {
+  const data = lembrete.data && lembrete.data <= hoje ? lembrete.data : hoje;
+  const valores = { data };
+  if (data === lembrete.data && lembrete.hora) valores.hora = lembrete.hora;
+  const titulo = String(lembrete.titulo ?? '').trim();
+  if (titulo && normalizar(titulo) !== 'passeio') valores.observacao = titulo;
+  return valores;
 }
 
 /**

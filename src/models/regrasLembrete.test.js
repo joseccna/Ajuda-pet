@@ -1,4 +1,4 @@
-import { dicaDoTipo, registroDoLembrete, tipoPeloTitulo } from './regrasLembrete';
+import { dicaDoTipo, passeioDoLembrete, registroDoLembrete, tipoPeloTitulo } from './regrasLembrete';
 
 const vacinas = [
   { id: 'v1', nome: 'V1' },
@@ -45,12 +45,48 @@ describe('registroDoLembrete', () => {
     const outro = registroDoLembrete({ petId: 'p', tipo: 'cuidado', titulo: 'Escovar' }, { cuidados });
     expect(outro.params).toEqual({ id: 'p' });
   });
-  it('consulta leva ao registro de consulta; medicação e passeio não têm registro', () => {
+  it('consulta leva ao registro de consulta; medicação não tem registro', () => {
     expect(registroDoLembrete({ petId: 'p', tipo: 'consulta', titulo: 'Retorno' }).pathname).toBe(
       '/pet/[id]/consulta',
     );
     expect(registroDoLembrete({ petId: 'p', tipo: 'medicacao', titulo: 'Remédio' })).toBeNull();
-    expect(registroDoLembrete({ petId: 'p', tipo: 'passeio', titulo: 'Parque' })).toBeNull();
+  });
+
+  it('passeio leva ao registro do passeio, já com a data, a hora e o título do lembrete', () => {
+    const lembrete = { petId: 'p', tipo: 'passeio', titulo: 'Parque', data: '2026-11-26', hora: '18:00' };
+    const destino = registroDoLembrete(lembrete, { hoje: '2026-11-27' });
+    expect(destino).toMatchObject({
+      pathname: '/pet/[id]/passeio-registro',
+      params: { id: 'p', data: '2026-11-26', hora: '18:00', observacao: 'Parque' },
+      rotulo: 'Registrar o passeio',
+    });
+  });
+});
+
+describe('passeioDoLembrete', () => {
+  const HOJE = '2026-11-27';
+  it('lembrete de hoje ou atrasado usa a data e a hora dele', () => {
+    expect(passeioDoLembrete({ titulo: 'Praia', data: HOJE, hora: '07:30' }, HOJE)).toEqual({
+      data: HOJE,
+      hora: '07:30',
+      observacao: 'Praia',
+    });
+    expect(passeioDoLembrete({ titulo: 'Praia', data: '2026-11-20', hora: '' }, HOJE)).toEqual({
+      data: '2026-11-20',
+      observacao: 'Praia',
+    });
+  });
+
+  it('lembrete de data futura vira passeio de hoje, sem a hora dele', () => {
+    expect(passeioDoLembrete({ titulo: 'Parque', data: '2026-12-01', hora: '18:00' }, HOJE)).toEqual({
+      data: HOJE,
+      observacao: 'Parque',
+    });
+  });
+
+  it('título igual ao tipo ("Passeio") não vira observação', () => {
+    expect(passeioDoLembrete({ titulo: ' passeio ', data: HOJE, hora: '' }, HOJE)).toEqual({ data: HOJE });
+    expect(passeioDoLembrete({ titulo: '', data: HOJE }, HOJE)).toEqual({ data: HOJE });
   });
 });
 

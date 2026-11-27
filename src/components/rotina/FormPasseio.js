@@ -20,8 +20,11 @@ function lerDecimal(texto) {
   return /^\d+(\.\d+)?$/.test(t) ? Number(t) : NaN;
 }
 
-/** Registra um passeio que já aconteceu (ou edita um da lista): data, hora, duração e distância. */
-export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
+/**
+ * Registra um passeio que já aconteceu (ou edita um da lista): data, hora, duração e distância.
+ * sugestao: { data (aaaa-mm-dd), hora, observacao } para começar preenchido (ex.: vindo de um lembrete).
+ */
+export function FormPasseio({ pet, passeio, sugestao, aoSalvar, aoExcluir }) {
   const editando = Boolean(passeio);
 
   const inicial = useMemo(() => {
@@ -37,13 +40,13 @@ export function FormPasseio({ pet, passeio, aoSalvar, aoExcluir }) {
       };
     }
     return {
-      data: formatarDataBR(paraISO(new Date())),
-      hora: '',
+      data: formatarDataBR(sugestao?.data || paraISO(new Date())),
+      hora: sugestao?.hora || '',
       duracao: '',
       distancia: '',
-      observacao: '',
+      observacao: sugestao?.observacao || '',
     };
-  }, [passeio]);
+  }, [passeio, sugestao]);
 
   const [e, setE] = useState(inicial);
   const [erros, setErros] = useState({});
