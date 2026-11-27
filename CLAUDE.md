@@ -22,7 +22,7 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Trabalho no branch `desenvolvimento`. Levar ao `main` (e criar etiquetas de versão) **só com OK
   do usuário**.
-- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (369 testes em 2026-11-25).
+- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (399 testes em 2026-11-27).
 - Migrações do banco (`src/database/migracoes.js`): só acrescentar no fim. A última é a 13.
 - Versão: `version` do `app.json` em MAIOR.MENOR.CORREÇÃO, subir a cada entrega. O número da
   compilação (versionCode) fica na nuvem do EAS (`appVersionSource: remote`, `autoIncrement` no
@@ -73,7 +73,6 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 ## Pendências
 
-- Testes automatizados de cuidados e de importar a ficha de outra pessoa.
 - M01: a ação de despedida do pet é difícil de achar.
 - Centralizar o texto do chip do passeio.
 - Documentação do projeto e manual de uso do app; atualizar os documentos de arquitetura,
