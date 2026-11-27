@@ -55,6 +55,9 @@ export default function RegistroDeCuidado() {
           detalhe={detalhe}
           aoSalvar={() => router.back()}
           aoExcluir={() => router.back()}
+          aoAdicionarTipo={() =>
+            router.replace({ pathname: '/pet/[id]/cuidado-novo', params: { id: pet.id } })
+          }
         />
       )}
     </Screen>

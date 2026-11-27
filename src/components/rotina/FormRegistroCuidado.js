@@ -14,8 +14,9 @@ import { Texto } from '../ui/Texto';
 /**
  * Registra um cuidado feito ou agenda um futuro (data depois de hoje).
  * O valor pago fica no bloco privado e nunca sai deste aparelho.
+ * aoAdicionarTipo: leva ao cadastro de outro cuidado (num registro novo, a lista pode não ter o que se quer).
  */
-export function FormRegistroCuidado({ tipos, tipoIdInicial, detalhe, aoSalvar, aoExcluir }) {
+export function FormRegistroCuidado({ tipos, tipoIdInicial, detalhe, aoSalvar, aoExcluir, aoAdicionarTipo }) {
   const editando = Boolean(detalhe);
   const [tipoId, setTipoId] = useState(detalhe?.registro.tipoId ?? tipoIdInicial ?? tipos[0]?.id ?? '');
 
@@ -86,18 +87,31 @@ export function FormRegistroCuidado({ tipos, tipoIdInicial, detalhe, aoSalvar, a
 
   return (
     <View>
-      {editando || tipos.length === 1 ? (
+      {editando ? (
         <Texto variante="subtitulo" style={{ marginBottom: 16 }}>
           {tipo?.nome}
         </Texto>
       ) : (
-        <ChipSelector
-          rotulo="Cuidado"
-          valor={tipoId}
-          aoMudar={setTipoId}
-          opcoes={tipos.map((t) => ({ valor: t.id, rotulo: t.nome }))}
-          erro={erros.tipo}
-        />
+        <View style={{ marginBottom: 16 }}>
+          <ChipSelector
+            rotulo="Cuidado"
+            valor={tipoId}
+            aoMudar={setTipoId}
+            opcoes={tipos.map((t) => ({ valor: t.id, rotulo: t.nome }))}
+            erro={erros.tipo}
+          />
+          {aoAdicionarTipo ? (
+            <Button
+              titulo="Adicionar outro cuidado"
+              icone="add"
+              variante="texto"
+              aoPressionar={() => {
+                liberarSaida();
+                aoAdicionarTipo();
+              }}
+            />
+          ) : null}
+        </View>
       )}
 
       <Campo
