@@ -69,9 +69,21 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
   (`src/models/regrasLembrete.js`); ao criar um desses, uma dica leva à carteirinha, aos
   cuidados ou à consulta. Testado no emulador (APK local).
 - 2026-11-27: lembrete de Passeio, ao ser marcado como feito, abre "Registrar passeio" já com
-  data, hora e título (4547799); chips de marcação do passeio centralizados (0f5f192). Testado
-  no emulador do Android Studio (Pixel_6, Android 17) com o Expo Go (`npx expo start --go
-  --android --port 8082`; a 8081 fica ocupada pelo Android Studio). Ainda sem subir a versão.
+  data, hora e título (4547799); chips de marcação do passeio centralizados (0f5f192).
+  "Registrar cuidado" e "Registrar dose" (atalhos da tela Pets) travavam no único cuidado ou
+  vacina cadastrado: agora mostram a lista para escolher e o botão "Adicionar outro cuidado" /
+  "Adicionar outra vacina" (e91d3a5, 17c21e8). Tudo testado pelo usuário no emulador.
+  **Ainda sem subir a versão** (a próxima é 1.1.3); a cota do EAS volta em 2026-12-01.
+
+## Teste no emulador (Android Studio)
+
+- Emulador Pixel_6 (Android 17, x86_64). adb em `%LOCALAPPDATA%\Android\Sdk\platform-tools`.
+- Mais rápido que compilar: Expo Go. `npx expo start --go --android --port 8082` (a 8081 fica
+  ocupada por um processo Java do Android Studio). Sem `CI=1`, para recarregar a cada mudança.
+- Se o Expo Go perder o servidor: `adb reverse tcp:8082 tcp:8082` e
+  `adb shell am start -a android.intent.action.VIEW -d exp://127.0.0.1:8082 host.exp.exponent`.
+- Parar a tarefa em segundo plano não encerra o Node do Expo: encerrar o processo da porta 8082.
+- No emulador há dados de teste fictícios (Luna, Banho, Tosa, V10).
 - Material da apresentação do grupo num doc do Claude ("Ajuda Pet — material para a
   apresentação"), com prints feitos no emulador com dados fictícios (Ana Souza, Luna, Mingau).
 
