@@ -22,7 +22,7 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
 
 - Trabalho no branch `desenvolvimento`. Levar ao `main` (e criar etiquetas de versão) **só com OK
   do usuário**.
-- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (399 testes em 2026-11-27).
+- Antes de dar uma tarefa por pronta: `npx expo lint` e `npx jest` (403 testes em 2026-11-27).
 - Migrações do banco (`src/database/migracoes.js`): só acrescentar no fim. A última é a 13.
 - Versão: `version` do `app.json` em MAIOR.MENOR.CORREÇÃO, subir a cada entrega. O número da
   compilação (versionCode) fica na nuvem do EAS (`appVersionSource: remote`, `autoIncrement` no
@@ -68,13 +68,16 @@ Camadas: `src/models` (regras puras, testáveis), `src/database` (migrações e 
   pergunta se quer registrar no pet e abre a dose, o registro do cuidado ou a consulta
   (`src/models/regrasLembrete.js`); ao criar um desses, uma dica leva à carteirinha, aos
   cuidados ou à consulta. Testado no emulador (APK local).
+- 2026-11-27: lembrete de Passeio, ao ser marcado como feito, abre "Registrar passeio" já com
+  data, hora e título (4547799); chips de marcação do passeio centralizados (0f5f192). Testado
+  no emulador do Android Studio (Pixel_6, Android 17) com o Expo Go (`npx expo start --go
+  --android --port 8082`; a 8081 fica ocupada pelo Android Studio). Ainda sem subir a versão.
 - Material da apresentação do grupo num doc do Claude ("Ajuda Pet — material para a
   apresentação"), com prints feitos no emulador com dados fictícios (Ana Souza, Luna, Mingau).
 
 ## Pendências
 
 - M01: a ação de despedida do pet é difícil de achar.
-- Centralizar o texto do chip do passeio.
 - Documentação do projeto e manual de uso do app; atualizar os documentos de arquitetura,
   telas e relatório de testes (migrações até a 13, passeio em segundos, refeições,
   notificações, versionamento). Esses documentos estão fora do repositório.
