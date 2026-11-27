@@ -580,6 +580,129 @@ suite('backup, ficha e importação com o SQLite', () => {
     });
   });
 
+  describe('ficha recebida de outra pessoa', () => {
+    const DEPOIS = '2030-01-01T00:00:00.000Z';
+    const MAIS_DEPOIS = '2031-01-01T00:00:00.000Z';
+    /** O arquivo da ficha tem sempre o mesmo nome no dia; guarda cada versão com um nome próprio. */
+    function guardar(resultado, nome) {
+      return arquivos.gravarTemporario(nome, arquivoDe(resultado));
+    }
+    const copiaDaLuna = () => db().getFirstSync("SELECT * FROM pets WHERE nome = 'Luna' AND origem = 'ficha'");
+
+    it('no próprio aparelho, vira uma cópia à parte e não mexe no pet original', async () => {
+      novoAparelho();
+      semear();
+      const original = db().getFirstSync('SELECT * FROM pets WHERE id = ?', [idLuna]);
+      const r = await ficha.gerarPacote({ petIds: [idLuna], secoes: SECOES_PADRAO, agora: HOJE });
+      const { previa, sessao } = await importacao.abrir(r.uri);
+      expect(previa.mesmoAparelho).toBe(true);
+      expect(previa.pets).toEqual([expect.objectContaining({ nome: 'Luna', acao: 'inserir' })]);
+      await importacao.aplicar(sessao, HOJE);
+      expect(contar('pets', "nome = 'Luna'")).toBe(2);
+      expect(db().getFirstSync('SELECT * FROM pets WHERE id = ?', [idLuna])).toEqual(original);
+      const copia = copiaDaLuna();
+      expect(copia.id).not.toBe(idLuna);
+      expect(copia.foto_uri).toMatch(/^file:\/\/\/doc\/importados\//);
+    });
+
+    it('os cuidados chegam ligados à cópia, sem os valores e anotações privadas', async () => {
+      const r = await ficha.gerarPacote({ petIds: [idLuna], secoes: SECOES_PADRAO, agora: HOJE });
+      const uri = guardar(r, 'ficha-cuidados.ajudapet');
+      novoAparelho();
+      await importacao.aplicar((await importacao.abrir(uri)).sessao, HOJE);
+      const copia = copiaDaLuna();
+      const tipos = db().getAllSync('SELECT * FROM tipos_cuidado');
+      expect(tipos).toEqual([expect.objectContaining({ nome: 'Banho', pet_id: copia.id, intervalo_dias: 30 })]);
+      const registros = db().getAllSync('SELECT * FROM registros_cuidado');
+      expect(registros).toEqual([expect.objectContaining({ tipo_id: tipos[0].id, data: '2026-09-05' })]);
+      expect(contar('cuidados_privados')).toBe(0);
+      expect(contar('registros_peso', `pet_id = '${copia.id}'`)).toBe(1);
+      expect(contar('homenagens')).toBe(0);
+      expect(contar('consultas')).toBe(0);
+    });
+
+    it('uma ficha mais nova do mesmo pet atualiza a cópia, sem duplicar', async () => {
+      novoAparelho();
+      semear();
+      const v1 = guardar(
+        await ficha.gerarPacote({ petIds: [idLuna], secoes: SECOES_PADRAO, agora: HOJE }),
+        'ficha-v1.ajudapet',
+      );
+      db().runSync("UPDATE pets SET raca = 'Labrador', atualizado_em = ? WHERE id = ?", [DEPOIS, idLuna]);
+      pesos.salvar(new RegistroPeso({ petId: idLuna, data: '2026-10-15', pesoG: 29000 }));
+      const v2 = guardar(
+        await ficha.gerarPacote({ petIds: [idLuna], secoes: SECOES_PADRAO, agora: HOJE }),
+        'ficha-v2.ajudapet',
+      );
+
+      novoAparelho();
+      await importacao.aplicar((await importacao.abrir(v1)).sessao, HOJE);
+      expect(copiaDaLuna().raca).toBe('Golden');
+
+      const { previa, sessao } = await importacao.abrir(v2);
+      expect(previa.pets).toEqual([expect.objectContaining({ nome: 'Luna', acao: 'atualizar' })]);
+      expect(previa.total).toMatchObject({ novos: 1, alterados: 1 });
+      await importacao.aplicar(sessao, HOJE);
+      expect(contar('pets')).toBe(1);
+      expect(copiaDaLuna().raca).toBe('Labrador');
+      expect(db().getAllSync('SELECT peso_g FROM registros_peso ORDER BY data').map((p) => p.peso_g)).toEqual([
+        28000, 29000,
+      ]);
+
+      // Quem recebeu mudou a cópia depois: a mesma ficha, mais velha, não desfaz a mudança.
+      db().runSync("UPDATE pets SET nome = 'Luna da Ana', atualizado_em = ? WHERE origem = 'ficha'", [
+        MAIS_DEPOIS,
+      ]);
+      const de_novo = await importacao.abrir(v2);
+      expect(de_novo.previa.pets).toEqual([expect.objectContaining({ acao: 'manter' })]);
+      await importacao.aplicar(de_novo.sessao, HOJE);
+      expect(db().getFirstSync('SELECT nome FROM pets').nome).toBe('Luna da Ana');
+      expect(contar('pets')).toBe(1);
+    });
+
+    it('arquivo de ficha forjado: tutor, valores, memorial e aparelhos não entram', async () => {
+      novoAparelho();
+      const t = '2026-10-01T10:00:00.000Z';
+      const linha = (id, extra) => ({ id, criado_em: t, atualizado_em: t, ...extra });
+      const bytes = montarPacote({
+        cabecalho: {
+          tipo: 'ficha',
+          versaoEsquema: MIGRACOES.length,
+          geradoEm: HOJE.toISOString(),
+          pacoteId: 'pacote-forjado-1',
+          dispositivoOrigemId: 'aparelho-de-fora',
+        },
+        tabelas: {
+          tutores: [linha('tutor-forjado-1', { nome: 'Intruso' })],
+          pets: [
+            linha('pet-forjado-01', {
+              nome: 'Rex',
+              especie: 'cachorro',
+              origem: 'proprio',
+              dono_dispositivo_id: 'aparelho-de-fora',
+              autor_dispositivo_id: 'aparelho-de-fora',
+            }),
+          ],
+          consultas: [linha('consulta-forj1', { pet_id: 'pet-forjado-01', data: '2026-09-01', motivo: 'X' })],
+          consultas_privadas: [linha('cpriv-forjada1', { consulta_id: 'consulta-forj1', valor_centavos: 1 })],
+          homenagens: [linha('homen-forjada1', { pet_id: 'pet-forjado-01', texto: 'x' })],
+          passeios: [linha('passeio-forj01', { pet_id: 'pet-forjado-01' })],
+        },
+      });
+      const uri = arquivos.gravarTemporario('ficha-forjada.ajudapet', bytes);
+      const { previa, sessao } = await importacao.abrir(uri);
+      expect(previa.ignoradas.sort()).toEqual(['consultas_privadas', 'homenagens', 'passeios', 'tutores']);
+      await importacao.aplicar(sessao, HOJE);
+      const rex = db().getFirstSync("SELECT * FROM pets WHERE nome = 'Rex'");
+      expect(rex).toMatchObject({ origem: 'ficha', dono_dispositivo_id: null, autor_dispositivo_id: null });
+      expect(rex.id).not.toBe('pet-forjado-01');
+      expect(db().getFirstSync('SELECT pet_id FROM consultas').pet_id).toBe(rex.id);
+      ['tutores', 'consultas_privadas', 'homenagens', 'passeios'].forEach((tabela) =>
+        expect(contar(tabela)).toBe(0),
+      );
+    });
+  });
+
   describe('preferência do lembrete', () => {
     it('é gravada e volta ao padrão se for inválida', () => {
       const p = prefs.salvar({ lembreteBackupDias: 15 });
